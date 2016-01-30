@@ -1,0 +1,75 @@
+﻿body {
+    background-color: white;
+    font-size: .85em;
+    font-family: "Trebuchet MS", Verdana, Helvetica, Sans-Serif;
+    margin: 0;
+    padding: 0;
+    color: dark;    
+}
+
+.page
+{
+    margin: 0px;
+    /*width: 95%;    */
+}
+
+.album-name
+{
+    margin: 0px auto;
+    text-align: center;
+    /*border-bottom: 1px solid lightgray;*/
+    padding-bottom: 8px;
+    font-family: 'Tahoma';
+    font-weight: normal;
+    font-size: 14px;
+    position: fixed;
+    width: 100%;
+    color: rgba(255,255,255, 0.9);    
+    padding-top: 10px;
+    background: rgba(0,0,0, 0.5);
+    border-bottom: 1px solid rgba(0,0,0,0.7);    
+}
+
+#photos-list
+{
+    padding-left: 0px;
+    margin: 0px;
+    padding: 0px;   
+    line-height: 0px;
+}
+
+.photo
+{        
+    list-style-type: none;    
+    display: inline-block;
+    min-height: 100px;
+    min-width: 100px;
+}
+
+.photo img
+{
+    display: block;
+    border-width: 0px;
+    margin: 0px auto;    
+}
+
+#album-list
+{    
+    text-align:center;
+    margin: 0px auto;
+    width: 50%;
+}
+
+#album-list a
+{
+    font-size: 14px;
+    color: Black;
+    border-bottom: 1px dotted gray;
+    text-decoration: none;
+    line-height: 2em;
+}
+
+#album-list a:hover
+{
+    border-bottom: 1px solid gray;
+}

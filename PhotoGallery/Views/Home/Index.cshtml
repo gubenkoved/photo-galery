@@ -1,0 +1,20 @@
+﻿@using System.Configuration;
+
+@{
+    ViewBag.Title = "Home Page";    
+}
+
+<script type="text/javascript">
+    function onSuccess() {
+        alert('success');
+    }
+</script>
+
+<div style="width: 100%;">
+    <div id="album-list">        
+        @foreach (PhotoGallery.Models.Album album in ViewBag.Albums)
+        {                
+            @Html.ActionLink(album.Name, "ViewAlbum", new { Album = album.Path }); <br />
+        }    
+    </div>
+</div>
