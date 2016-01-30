@@ -16,6 +16,14 @@ namespace PhotoGallery
             }
         }
 
+        public static string ThumbsRoot
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["ThumbsRoot"];
+            }
+        }
+
         public static int ThumbWidth
         {
             get

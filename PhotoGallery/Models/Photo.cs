@@ -18,7 +18,7 @@ namespace PhotoGallery.Models
 
             foreach (var c in "\\/:*?\"<>|")
             {
-                id.Replace(c, '-');
+                id = id.Replace(c, '-');
             }
 
             return id;

@@ -23,7 +23,7 @@ namespace PhotoGallery
 
             routes.MapRoute(
                 "Default", // Route name
-                "{controller}/{action}/{id}", // URL with parameters
+                "{action}/{id}", // URL with parameters
                 new { controller = "Home", action = "Index", id = UrlParameter.Optional } // Parameter defaults
             );
 
@@ -35,6 +35,13 @@ namespace PhotoGallery
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+
+            // create thumbs dir if missing
+
+            if (!System.IO.Directory.Exists(Settings.ThumbsRoot))
+            {
+                System.IO.Directory.CreateDirectory(Settings.ThumbsRoot);
+            }
         }
     }
 }

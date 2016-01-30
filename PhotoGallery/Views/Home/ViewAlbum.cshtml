@@ -5,7 +5,7 @@
 <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/lightbox.css")" media="screen" />
 <script src="@Url.Content("~/Scripts/lightbox_r.js")" type="text/javascript"></script>
     
-<script type="text/javascript">    
+<script type="text/javascript">
     var photos;
     var photoElements = [];
     var maxHeight = 200;
@@ -36,9 +36,9 @@
     $(document).ready(init);
 
     function init()
-    {                   
+    {
         $.getJSON('@Url.Action("GetPhotos", new {album = ViewBag.Album})', function (data) {
-            var items = [];        
+            var items = [];
 
             photos = data;
 
@@ -47,10 +47,10 @@
             {
                 ++loadingCursor;
 
-                
+
                 var photo = photos[id];
 
-                setupPhotoElement(photo, id);                
+                setupPhotoElement(photo, id);
             }
 
             loadThumbsForVisible();
@@ -58,16 +58,16 @@
     }
 
     function setupPhotoElement(photo, id)
-    {        
+    {
         var photoElement = $('<li />', { 'class': 'photo' });
-                
+
         photoElement.attr('id', id);
         photoElements.push(photoElement);
-                
+
         photo.id = id;
         photo.isLoaded = false;
         photo.isLoading = false;
-               
+
         photoElement.append(
             $('<a />', { href: photo.OriginalUri, 'rel': "lightbox[album]", title: photo.FileName }).append(
                 $('<img />', {'class': 'thumb', src: "@Url.Content("~/Content/blank.gif")", alt: photo.FileName}))//))
@@ -82,7 +82,7 @@
 
         var end = Math.min(loadingCursor + partSize, photos.length);
 
-        for (var i = loadingCursor; i < end; i++) 
+        for (var i = loadingCursor; i < end; i++)
         {
             ++loadingCursor;
 
@@ -98,7 +98,7 @@
 
         for (var i = 0; i < photoElements.length; i++) {
             var photoElement = photoElements[i];
-            
+
             if (elementInViewport2(photoElement))
             {
                 var id = $(photoElement).attr('id');
@@ -112,9 +112,9 @@
                     //$(photoElement).find('img')[0].src = "@Url.Content("~/Resources/ajax-loader.gif")";
 
                     if (photo.ThumbUri == null)
-                    {                        
+                    {
                         // make thumb creaion request
-                        loadingQueue.push(photo);                        
+                        loadingQueue.push(photo);
                     } else
                     {
                         // just set thumb image
@@ -123,19 +123,19 @@
 
                         //$(photoElement).find('img')[0].src = photo.ThumbUri;
                         //$($(photoElement).find('img')[0]).load( realign );
-//                        $($(photoElement).find('img')[0]).load( function () 
-//                            { 
-//                                console.log(this); 
-//                                //this.attr('source-width' = 
+//                        $($(photoElement).find('img')[0]).load( function ()
+//                            {
+//                                console.log(this);
+//                                //this.attr('source-width' =
 //                            } );
                     }
                 }
             }
         }
-        
+
         if (loadingQueue.length > 0)
         {
-            loadNextTumb();            
+            loadNextTumb();
         }
     }
 
@@ -174,32 +174,28 @@
     function loadNextTumb()
     {
         if (loadingQueue.length == 0)
-        {            
+        {
             return;
         }
-        
+
         if (curLoadingConnections < maxLoadingConnections)
         {
             curLoadingConnections += 1;
         } else
         {
             return;
-        }        
+        }
 
         var photo = loadingQueue[0];
 
         var link = '@Url.Action("GetThumbFor")';
-        
-        var params = $.query.load(link)
-            .set('album', '@ViewBag.Album')
-            .set('photo',  photo.FileName)
-            .toString();        
 
-        link += params;
+        link += "?album="  + encodeURIComponent('@ViewBag.Album');
+        link += "&photo=" + encodeURIComponent(photo.FileName);
 
         $.getJSON(link, function (data) {
             var id = photo.id;
-            
+
             console.log('thumb created for ' + id);
 
             photos[id].ThumbUri = data.ThumbUri;
@@ -212,11 +208,11 @@
 
             curLoadingConnections -= 1;
 
-            loadNextTumb();            
+            loadNextTumb();
         });
     }
 
-    function elementInViewport(el) 
+    function elementInViewport(el)
     {
         var rect = el.getBoundingClientRect();
 
@@ -228,7 +224,7 @@
         );
     };
 
-    function elementInViewport2(el) 
+    function elementInViewport2(el)
     {
         var rect = el.getBoundingClientRect();
 
@@ -296,7 +292,7 @@
         var row = [];
         var totalHeight
 
-        for (var i = start; i <= end; i++) 
+        for (var i = start; i <= end; i++)
         {
             row.push(getPhoto(i));
         }
@@ -325,7 +321,7 @@
         var row = getRow(start, end);
         var aspectSum = 0;
 
-        for (var i = 0; i < row.length; i++) 
+        for (var i = 0; i < row.length; i++)
         {
             aspectSum += getPhotoWidth(row[i]) / getPhotoHeight(row[i]);
         }

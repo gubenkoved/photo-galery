@@ -78,13 +78,11 @@ namespace PhotoGallery.Controllers
                 string thumbFileName = Photo.GetThumbFileNameFor(album, photoName);
                 string thumbPath = null;
 
-                //string thumbPhysPath = Path.Combine(VirtualPathUtility.ToAbsolute("~/Thumbs/"), thumbFileName);
-                string thumbPhysPath = Server.MapPath(Url.Content(Path.Combine("~/Thumbs/", thumbFileName)));
+                string thumbPhysPath = GetThumbPhysicalPathFor(thumbFileName);
 
                 if (System.IO.File.Exists(thumbPhysPath))
                 {
-                    //thumbPath = ResolveServerUrl(VirtualPathUtility.ToAbsolute("~/Thumbs/" + thumbFileName), false);
-                    thumbPath = Url.Content(Path.Combine("~/Thumbs/", thumbFileName));
+                    thumbPath = GetDownloadThumbUriFor(thumbFileName);
                 }
                 
                 photos.Add(
@@ -161,7 +159,8 @@ namespace PhotoGallery.Controllers
 
             string path = Path.Combine(Settings.GalleryRoot, album, photo);
             string thumbFileName = Photo.GetThumbFileNameFor(album, photo);
-            string thumbPhysPath = Server.MapPath(Url.Content(Path.Combine("~/Thumbs/", thumbFileName)));
+
+            string thumbPhysPath = GetThumbPhysicalPathFor(thumbFileName);
 
             int targetWidth = Settings.ThumbWidth;
             int targetHeight = Settings.ThumbHeight;
@@ -201,10 +200,27 @@ namespace PhotoGallery.Controllers
             }
 
             return Json(new
-                {
-                    //File = path,
-                    ThumbUri = Url.Content(Path.Combine("~/Thumbs/", thumbFileName))
-                }, JsonRequestBehavior.AllowGet);
+            {
+                ThumbUri = GetDownloadThumbUriFor(thumbFileName),
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public FilePathResult DownloadThumb(string thumbFileName)
+        {
+            string thumbPhysPath = Url.Content(Path.Combine(Settings.ThumbsRoot, thumbFileName));
+
+            return File(thumbPhysPath, "image/jpeg");
+        }
+
+        private string GetThumbPhysicalPathFor(string thumbName)
+        {
+            return Path.Combine(Settings.ThumbsRoot, thumbName);
+        }
+
+        private string GetDownloadThumbUriFor(string thumbName)
+        {
+            return Url.Content("~/DownloadThumb?thumbFileName=" + HttpUtility.UrlEncode(thumbName));
         }
 
         private void CalcLimitedSize(int width, int height, int maxWidth, int maxHeight, out int newWidth, out int newHeight)
@@ -222,6 +238,7 @@ namespace PhotoGallery.Controllers
                 newWidth = (int)(maxHeight * aspect);
             }
         }
+
         private IEnumerable<DirectoryInfo> GetAllGalleryDirs()
         {
             DirectoryInfo root = new DirectoryInfo(Settings.GalleryRoot);
@@ -232,6 +249,7 @@ namespace PhotoGallery.Controllers
 
             return allDirs;
         }
+
         private IEnumerable<DirectoryInfo> GetAllSubDirsFor(DirectoryInfo root)
         {
             List<DirectoryInfo> dirs = new List<DirectoryInfo>();
