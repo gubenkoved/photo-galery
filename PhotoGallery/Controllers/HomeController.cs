@@ -26,12 +26,13 @@ namespace PhotoGallery.Controllers
 
             foreach (DirectoryInfo dir in GetAllGalleryDirs())
             {
-                Uri relative = rootUri.MakeRelativeUri(new Uri(dir.FullName));
+                string relativePath = dir.FullName.Substring(Settings.GalleryRoot.Length);
 
                 albums.Add(new Album
                 {
                     Name = dir.Name,
-                    Path = relative.ToString()
+                    Path = relativePath,
+                    PhotoCount = PhotoCountIn(relativePath),
                 });
             }
 
@@ -42,25 +43,18 @@ namespace PhotoGallery.Controllers
 
         public ActionResult ViewAlbum(string album)
         {
-            album = HttpUtility.UrlDecode(album ?? "");
+            album = album ?? "";
 
             ViewBag.Album = album;
             ViewBag.AlbumName = album == "" ? "root" : album;
-
-            string path = Path.Combine(Settings.GalleryRoot, album);
-
-            DirectoryInfo dir = new DirectoryInfo(path);
-
-            ViewBag.PhotosCount = dir.GetFiles()
-                .Where(file => Settings.PhotosExtexsions.Contains(file.Extension.ToLower()))                
-                .Count();
+            ViewBag.PhotosCount = PhotoCountIn(album);
 
             return View();
         }
         
         public ActionResult GetPhotos(string album)
         {
-            album = HttpUtility.UrlDecode(album ?? "");
+            album = album ?? "";
 
             string path = Path.Combine(Settings.GalleryRoot, album);
 
@@ -100,7 +94,7 @@ namespace PhotoGallery.Controllers
 
         public ActionResult GetImage(string album, string photo)
         {
-            album = HttpUtility.UrlDecode(album ?? "");
+            album = album ?? "";
 
             string path = Path.Combine(Settings.GalleryRoot, album, photo);
 
@@ -109,7 +103,7 @@ namespace PhotoGallery.Controllers
 
         public ActionResult GetImageResized(string album, string photo)
         {
-            album = HttpUtility.UrlDecode(album ?? "");
+            album = album ?? "";
 
             string path = Path.Combine(Settings.GalleryRoot, album, photo);
 
@@ -155,7 +149,7 @@ namespace PhotoGallery.Controllers
 
         public ActionResult GetThumbFor(string album, string photo)
         {
-            album = HttpUtility.UrlDecode(album ?? "");
+            album = album ?? "";
 
             string path = Path.Combine(Settings.GalleryRoot, album, photo);
             string thumbFileName = Photo.GetThumbFileNameFor(album, photo);
@@ -211,6 +205,17 @@ namespace PhotoGallery.Controllers
             string thumbPhysPath = Url.Content(Path.Combine(Settings.ThumbsRoot, thumbFileName));
 
             return File(thumbPhysPath, "image/jpeg");
+        }
+
+        private int PhotoCountIn(string album)
+        {
+            string fullDirPath = Path.Combine(Settings.GalleryRoot, album);
+
+            DirectoryInfo dir = new DirectoryInfo(fullDirPath);
+
+            return dir.GetFiles()
+                .Where(file => Settings.PhotosExtexsions.Contains(file.Extension.ToLower()))
+                .Count();
         }
 
         private string GetThumbPhysicalPathFor(string thumbName)

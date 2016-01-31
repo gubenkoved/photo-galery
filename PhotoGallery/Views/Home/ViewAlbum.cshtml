@@ -190,7 +190,9 @@
 
         var link = '@Url.Action("GetThumbFor")';
 
-        link += "?album="  + encodeURIComponent('@ViewBag.Album');
+        debugger;
+
+        link += "?album="  + encodeURIComponent('@HttpUtility.JavaScriptStringEncode(ViewBag.Album)');
         link += "&photo=" + encodeURIComponent(photo.FileName);
 
         $.getJSON(link, function (data) {
