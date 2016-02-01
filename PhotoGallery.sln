@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoGalery2.Core", "PhotoG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoGalery2.Test", "PhotoGalery2.Test\PhotoGalery2.Test.csproj", "{A9E82478-767D-47B1-A4F1-0FB029C2397D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoGalery2.Server", "PhotoGalery2.Server\PhotoGalery2.Server.csproj", "{5E1B9C2F-818C-42C0-98D0-EE039C118906}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A9E82478-767D-47B1-A4F1-0FB029C2397D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9E82478-767D-47B1-A4F1-0FB029C2397D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9E82478-767D-47B1-A4F1-0FB029C2397D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E1B9C2F-818C-42C0-98D0-EE039C118906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E1B9C2F-818C-42C0-98D0-EE039C118906}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E1B9C2F-818C-42C0-98D0-EE039C118906}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E1B9C2F-818C-42C0-98D0-EE039C118906}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
