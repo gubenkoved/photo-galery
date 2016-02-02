@@ -16,7 +16,6 @@ namespace PhotoGalery2.Server.Models
         [DataMember]
         public string Name { get; set; }
 
-
         public static AlbumItemViewModel CreateFor(AlbumItem albumItem)
         {
             return new AlbumItemViewModel()

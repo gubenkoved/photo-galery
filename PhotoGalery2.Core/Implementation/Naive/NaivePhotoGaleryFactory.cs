@@ -24,7 +24,7 @@ namespace PhotoGalery2.Core.Implementation
 
         public override ContentProvider GetContentProvider()
         {
-            throw new NotImplementedException();
+            return new NaiveContentProvider();
         }
 
         public override MetadataProvider GetMetadataProvider()
