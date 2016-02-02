@@ -14,7 +14,7 @@ namespace PhotoGalery2.Core
     public class Album : AlbumItem
     {
         [DataMember]
-        public virtual IList<AlbumItem> Items { get; set; }
+        public virtual IEnumerable<AlbumItem> Items { get; set; }
 
         public Album()
         {

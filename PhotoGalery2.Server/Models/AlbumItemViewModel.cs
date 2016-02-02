@@ -8,7 +8,7 @@ using System.Web;
 namespace PhotoGalery2.Server.Models
 {
     [DataContract]
-    public class AlbumViewModel
+    public class AlbumItemViewModel
     {
         [DataMember]
         public string Id { get; set; }
@@ -16,12 +16,13 @@ namespace PhotoGalery2.Server.Models
         [DataMember]
         public string Name { get; set; }
 
-        public static AlbumViewModel CreateFor(Album album)
+
+        public static AlbumItemViewModel CreateFor(AlbumItem albumItem)
         {
-            return new AlbumViewModel()
+            return new AlbumItemViewModel()
             {
-                Id = album.Id,
-                Name = album.Name,
+                Id = albumItem.Id,
+                Name = albumItem.Name,
             };
         }
     }

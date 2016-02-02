@@ -32,7 +32,9 @@ namespace PhotoGalery2.Core.Implementation
 
                 yield return new Album()
                 {
+                    Id = dirInfo.Name,
                     Name = dirInfo.Name,
+                    Items = GetPhotosIn(subDir),
                 };
             }
         }
@@ -40,6 +42,23 @@ namespace PhotoGalery2.Core.Implementation
         public override void PrepareAlbum(Album album)
         {
             throw new NotImplementedException();
+        }
+
+        private IEnumerable<Photo> GetPhotosIn(string dir)
+        {
+            foreach(var filePath in System.IO.Directory
+                .EnumerateFiles(dir)
+                .Where(file => Extensions.Any(ext => file.ToLower().EndsWith(ext)))
+                .ToList())
+            {
+                var fileInfo = new System.IO.FileInfo(filePath);
+
+                yield return new Photo()
+                {
+                    Id = fileInfo.FullName,
+                    Name = fileInfo.Name,
+                };
+            }
         }
     }
 }
