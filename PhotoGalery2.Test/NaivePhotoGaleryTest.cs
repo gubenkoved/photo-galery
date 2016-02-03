@@ -15,12 +15,12 @@ namespace PhotoGalery2.Test
     {
         public override PhotoGaleryFactory CreateFactoryToTest()
         {
-            string absolutePathToRoot = Path.GetFullPath("TestFlatGaleryRoot");
+            string absolutePathToRoot = Path.GetFullPath("TestGaleryRoot");
 
             return new NaivePhotoGaleryFactory(new NaivePhotoGaleryFactory.SettingsGroup()
             {
                 RootDir = absolutePathToRoot,
-                Extensions = new string[] { "png", "jpg" },
+                Extensions = new string[] { ".png", ".jpg" },
             });
         }
     }

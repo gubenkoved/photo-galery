@@ -28,7 +28,8 @@ namespace PhotoGalery2.Server.Controllers
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            return metadataProvider.GetAlbums()
+            return metadataProvider.GetItems()
+                .OfType<Album>()
                 .Select(a => AlbumViewModel.CreateFor(a));
         }
 
@@ -42,7 +43,8 @@ namespace PhotoGalery2.Server.Controllers
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = metadataProvider.GetAlbums()
+            var album = metadataProvider.GetItems()
+                .OfType<Album>()
                 .SingleOrDefault(a => a.Id == albumId);
 
             if (album == null)
@@ -63,7 +65,8 @@ namespace PhotoGalery2.Server.Controllers
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = metadataProvider.GetAlbums()
+            var album = metadataProvider.GetItems()
+                .OfType<Album>()
                 .SingleOrDefault(a => a.Id == albumId);
 
             if (album == null)

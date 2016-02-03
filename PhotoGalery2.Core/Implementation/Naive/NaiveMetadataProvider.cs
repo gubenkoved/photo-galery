@@ -22,21 +22,9 @@ namespace PhotoGalery2.Core.Implementation
             Extensions = extensions;
         }
         
-        public override IEnumerable<Album> GetAlbums()
+        public override IEnumerable<AlbumItem> GetItems()
         {
-            string[] subDirs = System.IO.Directory.GetDirectories(RootPath);
-
-            foreach (var subDir in subDirs)
-            {
-                var dirInfo = new System.IO.DirectoryInfo(subDir);
-
-                yield return new Album()
-                {
-                    Id = dirInfo.Name,
-                    Name = dirInfo.Name,
-                    Items = GetPhotosIn(subDir),
-                };
-            }
+            return GetItemsRecoursive(RootPath);
         }
 
         public override void PrepareAlbum(Album album)
@@ -44,7 +32,31 @@ namespace PhotoGalery2.Core.Implementation
             throw new NotImplementedException();
         }
 
-        private IEnumerable<Photo> GetPhotosIn(string dir)
+        private IEnumerable<AlbumItem> GetItemsRecoursive(string currentDir)
+        {
+            string[] subDirs = System.IO.Directory.GetDirectories(currentDir);
+
+            foreach (var subDir in subDirs)
+            {
+                var dirInfo = new System.IO.DirectoryInfo(subDir);
+
+                var subItems = GetItemsRecoursive(subDir);
+
+                yield return new Album()
+                {
+                    Id = dirInfo.Name,
+                    Name = dirInfo.Name,
+                    Items = subItems,
+                };
+            }
+
+            foreach(var photo in GetPhotosStraghtIn(currentDir))
+            {
+                yield return photo;
+            }
+        }
+
+        private IEnumerable<Photo> GetPhotosStraghtIn(string dir)
         {
             foreach(var filePath in System.IO.Directory
                 .EnumerateFiles(dir)
