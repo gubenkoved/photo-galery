@@ -9,26 +9,37 @@ using System.Web;
 namespace PhotoGalery2.Server.Models
 {
     [DataContract]
-    public class AlbumViewModelExtended : AlbumViewModel
+    public class AlbumViewModelExtended : AlbumViewModel,
+        IViewModelFilledInByModel<Album>
     {
         [DataMember]
-        public List<AlbumItemViewModel> Items { get; set; }
+        public List<AlbumViewModel> AlbumItems { get; set; }
+
+        [DataMember]
+        public List<AlbumContentItemViewModel> ContentItems { get; set; }
 
         public AlbumViewModelExtended()
         {
-            Items = new List<AlbumItemViewModel>();
+            AlbumItems = new List<AlbumViewModel>();
+            ContentItems = new List<AlbumContentItemViewModel>();
         }
 
-        public new static AlbumViewModelExtended CreateFor(Album album)
+        public override void FillBy(Album model)
         {
-            var result = new AlbumViewModelExtended()
+            base.FillBy(model);
+
+            foreach (var item in model.Items)
             {
-                Items = album.Items.Select(x => AlbumItemViewModel.CreateFor(x)).ToList(),
-            };
+                var albumItemViewModel = AlbumItemViewModel.CreateFor(item);
 
-            FieldsCopier.Copy(AlbumViewModel.CreateFor(album), result);
-
-            return result;
+                if (albumItemViewModel is AlbumViewModel)
+                {
+                    AlbumItems.Add(albumItemViewModel as AlbumViewModel);
+                } else if (albumItemViewModel is AlbumContentItemViewModel)
+                {
+                    ContentItems.Add(albumItemViewModel as AlbumContentItemViewModel);
+                }
+            }
         }
     }
 }

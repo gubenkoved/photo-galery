@@ -8,7 +8,10 @@ using System.Web;
 namespace PhotoGalery2.Server.Models
 {
     [DataContract]
-    public class AlbumItemViewModel
+    [KnownType(typeof(AlbumViewModel))]
+    [KnownType(typeof(AlbumContentItemViewModel))]
+    [KnownType(typeof(AlbumViewModelExtended))]
+    public class AlbumItemViewModel : IViewModelFilledInByModel<AlbumItem>
     {
         [DataMember]
         public string Id { get; set; }
@@ -16,13 +19,23 @@ namespace PhotoGalery2.Server.Models
         [DataMember]
         public string Name { get; set; }
 
+        public void FillBy(AlbumItem model)
+        {
+            Id = model.Id;
+            Name = model.Name;
+        }
+
         public static AlbumItemViewModel CreateFor(AlbumItem albumItem)
         {
-            return new AlbumItemViewModel()
+            if (albumItem is AlbumContentItem)
             {
-                Id = albumItem.Id,
-                Name = albumItem.Name,
-            };
+                return new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
+            } else if (albumItem is Album)
+            {
+                return new AlbumViewModel().FillBy2(albumItem as Album);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

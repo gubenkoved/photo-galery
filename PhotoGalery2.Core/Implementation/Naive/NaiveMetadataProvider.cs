@@ -22,9 +22,16 @@ namespace PhotoGalery2.Core.Implementation
             Extensions = extensions;
         }
         
-        public override IEnumerable<AlbumItem> GetItems()
+        public override Album GetRoot()
         {
-            return GetItemsRecoursive(RootPath);
+            var album = new Album()
+            {
+                Id = Album.RootAlbumId,
+                Name = Album.RootAlbumId,
+                Items = GetItemsRecoursive(RootPath),
+            };
+
+            return album;
         }
 
         public override void PrepareAlbum(Album album)

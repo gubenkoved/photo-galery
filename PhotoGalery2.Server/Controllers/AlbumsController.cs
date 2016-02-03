@@ -20,17 +20,17 @@ namespace PhotoGalery2.Server.Controllers
         }
 
         /// <summary>
-        /// Returns light information about all albums available.
+        /// Returns light information about all albums items available.
         /// </summary>
         [HttpGet]
         [Route("")]
-        public IEnumerable<AlbumViewModel> GetAlbums()
+        public AlbumViewModelExtended GetRoot()
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            return metadataProvider.GetItems()
-                .OfType<Album>()
-                .Select(a => AlbumViewModel.CreateFor(a));
+            var rootAlbum = metadataProvider.GetRoot();
+
+            return new AlbumViewModelExtended().FillBy2(rootAlbum);
         }
 
         /// <summary>
@@ -38,36 +38,50 @@ namespace PhotoGalery2.Server.Controllers
         /// </summary>
         /// <param name="albumId">Id of album</param>
         [HttpGet]
-        [Route("{albumId}")]
-        public AlbumViewModelExtended GetAlbum(string albumId)
+        public AlbumViewModelExtended GetAlbum(
+            [FromUri(Name="aid")] string albumId)
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = metadataProvider.GetItems()
-                .OfType<Album>()
-                .SingleOrDefault(a => a.Id == albumId);
+            var album = metadataProvider.GetRoot();
+
+            if (albumId != Album.RootAlbumId)
+            {
+                album = album
+                    .Items
+                    .OfType<Album>()
+                    .SingleOrDefault(a => a.Id == albumId);
+            }
 
             if (album == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                this.ThrowHttpErrorResponseException(HttpStatusCode.NotFound,
+                    $"album with id '{albumId}' was not found");
             }
 
-            return AlbumViewModelExtended.CreateFor(album);
+            return new AlbumViewModelExtended().FillBy2(album);
         }
 
         /// <summary>
         /// Returns original content of album content item.
         /// </summary>
         [HttpGet]
-        [Route("{albumId}/content/{*albumContentItemId}")]
-        [Route("{albumId}/content")]
-        public HttpResponseMessage GetAlbumContentItem(string albumId, string albumContentItemId)
+        [Route("content")]
+        public HttpResponseMessage GetAlbumContentItem(
+            [FromUri(Name = "aid")] string albumId,
+            [FromUri(Name = "cid")] string albumContentItemId)
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = metadataProvider.GetItems()
-                .OfType<Album>()
-                .SingleOrDefault(a => a.Id == albumId);
+            var album = metadataProvider.GetRoot();
+
+            if (albumId != Album.RootAlbumId)
+            {
+                album = album
+                    .Items
+                    .OfType<Album>()
+                    .SingleOrDefault(a => a.Id == albumId);
+            }
 
             if (album == null)
             {

@@ -30,12 +30,12 @@ namespace PhotoGalery2.Test
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var rootItems = metadataProvider.GetItems();
+            var rootItems = metadataProvider.GetRoot().Items;
 
             Assert.IsNotNull(rootItems);
             Assert.AreEqual(3, rootItems.Count());
             Assert.AreEqual(2, rootItems.OfType<Album>().Count());
-            Assert.AreEqual(1, rootItems.OfType<AlbumContentItem>().Count());
+            Assert.AreEqual(1, rootItems.OfType<Album>().Count());
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace PhotoGalery2.Test
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var rootItems = metadataProvider.GetItems();
+            var rootItems = metadataProvider.GetRoot().Items;
 
             var a2Album = rootItems.OfType<Album>()
                 .SingleOrDefault(a => a.Name == "A2");
@@ -53,7 +53,7 @@ namespace PhotoGalery2.Test
 
             Assert.AreEqual(2, a2Album.Items.Count());
             Assert.AreEqual(1, a2Album.Items.OfType<Album>().Count());
-            Assert.AreEqual(1, a2Album.Items.OfType<AlbumContentItem>().Count());
+            Assert.AreEqual(1, a2Album.Items.OfType<Album>().Count());
         }
     }
 }

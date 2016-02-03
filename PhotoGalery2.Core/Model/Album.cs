@@ -13,6 +13,8 @@ namespace PhotoGalery2.Core
     [DataContract]
     public class Album : AlbumItem
     {
+        public const string RootAlbumId = ":root";
+
         [DataMember]
         public virtual IEnumerable<AlbumItem> Items { get; set; }
 

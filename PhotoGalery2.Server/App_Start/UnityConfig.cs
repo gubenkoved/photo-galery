@@ -21,7 +21,7 @@ namespace PhotoGalery2.Server
                 (new InjectionConstructor(new NaivePhotoGaleryFactory.SettingsGroup()
                 {
                     RootDir = @"C:\Users\nrj\Documents\Dropbox\Photos",
-                    Extensions = new[] { ".jpg", ".jpeg" },
+                    Extensions = new[] { ".jpg", ".jpeg", ".bmp" },
                 }));
             
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);

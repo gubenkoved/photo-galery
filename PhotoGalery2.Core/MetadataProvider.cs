@@ -9,9 +9,9 @@ namespace PhotoGalery2.Core
     public abstract class MetadataProvider
     {
         /// <summary>
-        /// Returns the collection of albums available.
+        /// Returns the root album - collection of albums available.
         /// </summary>
-        public abstract IEnumerable<AlbumItem> GetItems();
+        public abstract Album GetRoot();
 
         /// <summary>
         /// Prepares album to being viewed. Could imply building up help data structures with

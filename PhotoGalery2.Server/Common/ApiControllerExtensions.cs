@@ -20,5 +20,14 @@ namespace PhotoGalery2.Server
             result.Content.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
             return result;
         }
+
+        public static void ThrowHttpErrorResponseException(this ApiController controller,
+            HttpStatusCode code, string desc = null)
+        {
+            throw new HttpResponseException(new HttpResponseMessage(code)
+            {
+                ReasonPhrase = desc,
+            });
+        }
     }
 }

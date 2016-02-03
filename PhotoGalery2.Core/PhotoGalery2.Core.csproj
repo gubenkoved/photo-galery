@@ -49,7 +49,7 @@
     <Compile Include="Implementation\Naive\NaivePhotoGaleryFactory.cs" />
     <Compile Include="MetadataProvider.cs" />
     <Compile Include="Model\Album.cs" />
-    <Compile Include="Model\AlbumContent.cs" />
+    <Compile Include="Model\AlbumContentItem.cs" />
     <Compile Include="Model\AlbumItem.cs" />
     <Compile Include="Model\Photo.cs" />
     <Compile Include="PhotoGaleryFactory.cs" />
