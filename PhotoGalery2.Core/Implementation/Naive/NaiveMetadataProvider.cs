@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhotoGalery2.Core.Implementation
+namespace PhotoGalery2.Core.Implementation.Naive
 {
     public class NaiveMetadataProvider : MetadataProvider
     {
@@ -49,11 +49,12 @@ namespace PhotoGalery2.Core.Implementation
 
                 var subItems = GetItemsRecoursive(subDir);
 
-                yield return new Album()
+                yield return new NaiveAlbum()
                 {
                     Id = dirInfo.Name,
                     Name = dirInfo.Name,
                     Items = subItems,
+                    PhysicalDir = subDir,
                 };
             }
 
@@ -74,7 +75,7 @@ namespace PhotoGalery2.Core.Implementation
 
                 yield return new Photo()
                 {
-                    Id = fileInfo.FullName,
+                    Id = fileInfo.Name,
                     Name = fileInfo.Name,
                 };
             }

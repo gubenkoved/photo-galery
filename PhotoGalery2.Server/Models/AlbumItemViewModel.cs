@@ -19,6 +19,9 @@ namespace PhotoGalery2.Server.Models
         [DataMember]
         public string Name { get; set; }
 
+        [DataMember]
+        public string Url { get; set; }
+
         public void FillBy(AlbumItem model)
         {
             Id = model.Id;

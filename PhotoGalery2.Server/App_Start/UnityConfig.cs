@@ -1,6 +1,7 @@
 using Microsoft.Practices.Unity;
 using PhotoGalery2.Core;
 using PhotoGalery2.Core.Implementation;
+using PhotoGalery2.Core.Implementation.Naive;
 using System.Web.Http;
 using Unity.WebApi;
 

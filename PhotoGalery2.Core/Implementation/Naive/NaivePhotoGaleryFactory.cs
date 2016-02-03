@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhotoGalery2.Core.Implementation
+namespace PhotoGalery2.Core.Implementation.Naive
 {
     public class NaivePhotoGaleryFactory : PhotoGaleryFactory
     {

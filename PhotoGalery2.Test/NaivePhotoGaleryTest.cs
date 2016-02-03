@@ -7,6 +7,7 @@ using PhotoGalery2.Core;
 using PhotoGalery2.Core.Implementation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using PhotoGalery2.Core.Implementation.Naive;
 
 namespace PhotoGalery2.Test
 {

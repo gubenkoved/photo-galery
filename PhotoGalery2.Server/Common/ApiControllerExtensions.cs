@@ -22,11 +22,11 @@ namespace PhotoGalery2.Server
         }
 
         public static void ThrowHttpErrorResponseException(this ApiController controller,
-            HttpStatusCode code, string desc = null)
+            HttpStatusCode code, string message = null)
         {
             throw new HttpResponseException(new HttpResponseMessage(code)
             {
-                ReasonPhrase = desc,
+                Content = new StringContent(message),
             });
         }
     }
