@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Web.Http;
 
 namespace PhotoGalery2.Server
@@ -19,6 +20,10 @@ namespace PhotoGalery2.Server
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+
+            // this line DISABLES XML formatter for convenience of view in Browser
+            config.Formatters.XmlFormatter.SupportedMediaTypes.Clear();
         }
     }
 }
