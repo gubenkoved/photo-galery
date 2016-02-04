@@ -24,11 +24,11 @@ namespace PhotoGalery2.Core.Implementation.Naive
         
         public override Album GetRoot()
         {
-            var rootAlbum = new Album()
+            var rootAlbum = new NaiveAlbum()
             {
                 Id = Album.RootAlbumId,
                 Name = Album.RootAlbumId,
-                
+                PhysicalDir = RootPath,
             };
 
             rootAlbum.Items = GetItemsRecoursive(rootAlbum, RootPath);
