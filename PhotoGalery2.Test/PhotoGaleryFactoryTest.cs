@@ -63,7 +63,7 @@ namespace PhotoGalery2.Test
 
             var rootAlbums = metadataProvider.GetRoot();
         
-            Assert.IsNull(rootAlbums.Parent);
+            Assert.IsNull(rootAlbums.ParentAlbum);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace PhotoGalery2.Test
             var a2Album = root.Items.OfType<Album>()
                 .SingleOrDefault(a => a.Name == "A2");
 
-            Assert.AreEqual(root, a2Album.Parent);
+            Assert.AreEqual(root, a2Album.ParentAlbum);
         }
     }
 }

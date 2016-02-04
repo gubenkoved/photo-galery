@@ -53,7 +53,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
                 {
                     Id = dirInfo.Name,
                     Name = dirInfo.Name,
-                    Parent = currentAlbum,
+                    ParentAlbum = currentAlbum,
                     PhysicalDir = subDir,
                 };
 
@@ -64,7 +64,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
             foreach(var photo in GetPhotosStraghtIn(currentDir))
             {
-                photo.Parent = currentAlbum;
+                photo.ParentAlbum = currentAlbum;
 
                 yield return photo;
             }

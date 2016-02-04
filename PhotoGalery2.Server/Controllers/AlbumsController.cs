@@ -13,10 +13,12 @@ namespace PhotoGalery2.Server.Controllers
     public class AlbumsController : ApiController
     {
         private PhotoGaleryFactory _factory;
+        private AlbumItemsPathProvider _albumItemsPathProvider;
 
-        public AlbumsController(PhotoGaleryFactory factory)
+        public AlbumsController(PhotoGaleryFactory factory, AlbumItemsPathProvider albumPathProvider)
         {
             _factory = factory;
+            _albumItemsPathProvider = albumPathProvider;
         }
 
         /// <summary>
@@ -30,7 +32,7 @@ namespace PhotoGalery2.Server.Controllers
 
             var rootAlbum = metadataProvider.GetRoot();
 
-            return new AlbumViewModelExtended().FillBy2(rootAlbum);
+            return new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(rootAlbum);
         }
 
         /// <summary>
@@ -43,7 +45,7 @@ namespace PhotoGalery2.Server.Controllers
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = AlbumPathHelper.Find(metadataProvider.GetRoot(), albumPath);
+            var album = _albumItemsPathProvider.FindByAlbumPath(metadataProvider.GetRoot(), albumPath);
 
             if (album == null)
             {
@@ -51,7 +53,7 @@ namespace PhotoGalery2.Server.Controllers
                     $"album with id '{albumPath}' was not found");
             }
 
-            return new AlbumViewModelExtended().FillBy2(album);
+            return new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(album);
         }
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace PhotoGalery2.Server.Controllers
         {
             var metadataProvider = _factory.GetMetadataProvider();
 
-            var album = AlbumPathHelper.Find(metadataProvider.GetRoot(), albumPath);
+            var album = _albumItemsPathProvider.FindByAlbumPath(metadataProvider.GetRoot(), albumPath);
 
             if (album == null)
             {

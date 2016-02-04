@@ -11,7 +11,7 @@ namespace PhotoGalery2.Core
     public abstract class AlbumItem
     {
         [IgnoreDataMember]
-        public Album Parent { get; set; }
+        public Album ParentAlbum { get; set; }
 
         [DataMember]
         public virtual string Id { get; set; }
