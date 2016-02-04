@@ -28,18 +28,37 @@ namespace PhotoGalery2.Server.Models
         {
             base.FillBy(model);
 
-            foreach (var item in model.Items)
+            foreach (var albumItem in model.Items)
             {
-                var albumItemViewModel = AlbumItemViewModel.CreateFor(item);
+                if (albumItem is AlbumContentItem)
+                {
+                    var contentItemVM = new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
 
-                if (albumItemViewModel is AlbumViewModel)
+                    ContentItems.Add(contentItemVM);
+                }
+                else if (albumItem is Album)
                 {
-                    AlbumItems.Add(albumItemViewModel as AlbumViewModel);
-                } else if (albumItemViewModel is AlbumContentItemViewModel)
-                {
-                    ContentItems.Add(albumItemViewModel as AlbumContentItemViewModel);
+                    var albumVM = new AlbumViewModel().FillBy2(albumItem as Album);
+
+                    albumVM.Url = AlbumPathHelper.ConstructAlbumPathFor(albumItem as Album);
+
+                    AlbumItems.Add(albumVM);
                 }
             }
+        }
+
+        public static AlbumItemViewModel CreateFor(AlbumItem albumItem)
+        {
+            if (albumItem is AlbumContentItem)
+            {
+                return new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
+            }
+            else if (albumItem is Album)
+            {
+                return new AlbumViewModel().FillBy2(albumItem as Album);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

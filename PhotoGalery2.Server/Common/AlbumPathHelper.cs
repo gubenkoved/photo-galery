@@ -41,5 +41,28 @@ namespace PhotoGalery2.Server
 
             return album;
         }
+
+        public static string ConstructAlbumPathFor(Album album)
+        {
+            string path = string.Empty;
+
+            Album current = album;
+
+            while (current != null)
+            {
+                path = $":{current.Id}" + path;
+
+                current = current.Parent;
+            }
+
+            path = Album.RootAlbumId + path;
+
+            return path;
+        }
+
+        public static string GetApiRoot()
+        {
+            return "";
+        }
     }
 }

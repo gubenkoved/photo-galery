@@ -29,18 +29,5 @@ namespace PhotoGalery2.Server.Models
             Id = model.Id;
             Name = model.Name;
         }
-
-        public static AlbumItemViewModel CreateFor(AlbumItem albumItem)
-        {
-            if (albumItem is AlbumContentItem)
-            {
-                return new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
-            } else if (albumItem is Album)
-            {
-                return new AlbumViewModel().FillBy2(albumItem as Album);
-            }
-
-            throw new NotImplementedException();
-        }
     }
 }
