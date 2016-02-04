@@ -10,6 +10,9 @@ namespace PhotoGalery2.Core
     [DataContract]
     public abstract class AlbumItem
     {
+        [IgnoreDataMember]
+        public AlbumItem Parent { get; set; }
+
         [DataMember]
         public virtual string Id { get; set; }
 

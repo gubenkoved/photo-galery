@@ -24,14 +24,16 @@ namespace PhotoGalery2.Core.Implementation.Naive
         
         public override Album GetRoot()
         {
-            var album = new Album()
+            var rootAlbum = new Album()
             {
                 Id = Album.RootAlbumId,
                 Name = Album.RootAlbumId,
-                Items = GetItemsRecoursive(RootPath),
+                
             };
 
-            return album;
+            rootAlbum.Items = GetItemsRecoursive(rootAlbum, RootPath);
+
+            return rootAlbum;
         }
 
         public override void PrepareAlbum(Album album)
@@ -39,7 +41,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
             throw new NotImplementedException();
         }
 
-        private IEnumerable<AlbumItem> GetItemsRecoursive(string currentDir)
+        private IEnumerable<AlbumItem> GetItemsRecoursive(Album currentAlbum, string currentDir)
         {
             string[] subDirs = System.IO.Directory.GetDirectories(currentDir);
 
@@ -47,19 +49,23 @@ namespace PhotoGalery2.Core.Implementation.Naive
             {
                 var dirInfo = new System.IO.DirectoryInfo(subDir);
 
-                var subItems = GetItemsRecoursive(subDir);
-
-                yield return new NaiveAlbum()
+                var subAlbum = new NaiveAlbum()
                 {
                     Id = dirInfo.Name,
                     Name = dirInfo.Name,
-                    Items = subItems,
+                    Parent = currentAlbum,
                     PhysicalDir = subDir,
                 };
+
+                subAlbum.Items = GetItemsRecoursive(subAlbum, subDir);
+
+                yield return subAlbum;
             }
 
             foreach(var photo in GetPhotosStraghtIn(currentDir))
             {
+                photo.Parent = currentAlbum;
+
                 yield return photo;
             }
         }

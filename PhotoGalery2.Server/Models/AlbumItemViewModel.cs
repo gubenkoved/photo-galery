@@ -13,6 +13,8 @@ namespace PhotoGalery2.Server.Models
     [KnownType(typeof(AlbumViewModelExtended))]
     public class AlbumItemViewModel : IViewModelFilledInByModel<AlbumItem>
     {
+        internal Album Parent { get; set; }
+
         [DataMember]
         public string Id { get; set; }
 
