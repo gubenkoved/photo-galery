@@ -98,5 +98,57 @@ namespace PhotoGalery2.Server.Controllers
                 contentResult.Stream,
                 contentResult.MimeType);
         }
+
+        /// <summary>
+        /// Returns original content of album content item.
+        /// </summary>
+        [HttpGet]
+        [Route("{albumPath}/content/{contentItemId}/thumbnail")]
+        public HttpResponseMessage GetAlbumContentItemThumbnail(
+            string albumPath,
+            string contentItemId,
+            [FromUri] int w = 200,
+            [FromUri] int h = 200)
+        {
+            if (w < 10 || h < 10)
+            {
+                this.ThrowHttpErrorResponseException(HttpStatusCode.BadRequest, "Invalid thumbnail size");
+            }
+
+            var metadataProvider = _factory.GetMetadataProvider();
+
+            var album = _albumItemsPathProvider.FindByAlbumPath(metadataProvider.GetRoot(), albumPath);
+
+            if (album == null)
+            {
+                this.ThrowHttpErrorResponseException(HttpStatusCode.NotFound,
+                    $"album with id '{albumPath}' was not found");
+            }
+
+            var contentItem = album.Items
+                .SingleOrDefault(i => i.Id == contentItemId);
+
+            if (contentItem == null)
+            {
+                this.ThrowHttpErrorResponseException(HttpStatusCode.NotFound,
+                    $"content item with id '{contentItemId}' was not found");
+            }
+
+            if (!(contentItem is AlbumContentItem))
+            {
+                this.ThrowHttpErrorResponseException(HttpStatusCode.BadRequest,
+                    $"item with id '{contentItemId}' is not content item");
+            }
+
+            var contentProvider = _factory.GetContentProvider();
+
+            var contentResult = contentProvider.GetThumbnail(album, contentItemId, new Size(w, h));
+
+            Request.RegisterForDispose(contentResult.Stream);
+
+            return this.ContentStreamResult(
+                contentResult.Stream,
+                contentResult.MimeType);
+        }
     }
 }

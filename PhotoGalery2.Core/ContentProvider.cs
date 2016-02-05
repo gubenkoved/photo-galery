@@ -18,6 +18,6 @@ namespace PhotoGalery2.Core
         /// Returns stream with content of thumbnail image for request album item.
         /// </summary>
         /// <param name="thumbSize">Max requested thumbnail size.</param>
-        public abstract AlbumItemContentResult GetThumb(Album album, string contentItemId, Size thumbSize);
+        public abstract AlbumItemContentResult GetThumbnail(Album album, string contentItemId, Size thumbSize);
     }
 }

@@ -12,11 +12,5 @@ namespace PhotoGalery2.Core
         /// Returns the root album - collection of albums available.
         /// </summary>
         public abstract Album GetRoot();
-
-        /// <summary>
-        /// Prepares album to being viewed. Could imply building up help data structures with
-        /// precalculated metadata.
-        /// </summary>
-        public abstract void PrepareAlbum(Album album);
     }
 }

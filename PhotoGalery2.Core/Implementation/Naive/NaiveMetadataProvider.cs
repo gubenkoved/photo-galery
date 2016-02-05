@@ -36,11 +36,6 @@ namespace PhotoGalery2.Core.Implementation.Naive
             return rootAlbum;
         }
 
-        public override void PrepareAlbum(Album album)
-        {
-            throw new NotImplementedException();
-        }
-
         private IEnumerable<AlbumItem> GetItemsRecoursive(Album currentAlbum, string currentDir)
         {
             string[] subDirs = System.IO.Directory.GetDirectories(currentDir);
