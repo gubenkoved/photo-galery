@@ -12,6 +12,8 @@ namespace PhotoGalery2.Core.Implementation.Naive
         {
             public string RootDir { get; set; }
 
+            public string ThumbCacheDir { get; set; }
+
             public IEnumerable<string> Extensions { get; set; }
         }
 
