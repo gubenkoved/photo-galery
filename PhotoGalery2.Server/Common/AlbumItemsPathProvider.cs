@@ -45,5 +45,22 @@ namespace PhotoGalery2.Server
 
             return contentItemUriBuilder.Uri;
         }
+
+        public Uri GetContentItemThumbUri(AlbumContentItem contentItem, Size thumbSize)
+        {
+            var rootUri = GetApiRootUri();
+
+            string albumPath = ConstructAlbumPathSegment(contentItem.ParentAlbum);
+
+            string contentItemPathSegment = ConstructContentItemPathSegment(contentItem);
+
+            var contentItemUriBuilder = new UriBuilder(rootUri);
+
+            contentItemUriBuilder.Path += $"albums/{albumPath}/content/{contentItemPathSegment}/thumbnail";
+
+            contentItemUriBuilder.Query = $"w={thumbSize.Width}&h={thumbSize.Height}";
+
+            return contentItemUriBuilder.Uri;
+        }
     }
 }

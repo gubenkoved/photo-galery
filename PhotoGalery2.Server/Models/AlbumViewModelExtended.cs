@@ -45,7 +45,7 @@ namespace PhotoGalery2.Server.Models
                 ParentAlbumUri = _pathProvider.GetAlbumUri(model.ParentAlbum);
             }
 
-            Uri = _pathProvider.GetAlbumUri(model);
+            Url = _pathProvider.GetAlbumUri(model);
 
             foreach (var albumItem in model.Items)
             {
@@ -53,7 +53,8 @@ namespace PhotoGalery2.Server.Models
                 {
                     var contentItemVM = new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
 
-                    contentItemVM.Uri = _pathProvider.GetContentItemUri(albumItem as AlbumContentItem);
+                    contentItemVM.Url = _pathProvider.GetContentItemUri(albumItem as AlbumContentItem);
+                    contentItemVM.ThumUrl = _pathProvider.GetContentItemThumbUri(albumItem as AlbumContentItem, new Size(200, 200));
 
                     ContentItems.Add(contentItemVM);
                 }
@@ -61,7 +62,7 @@ namespace PhotoGalery2.Server.Models
                 {
                     var albumVM = new AlbumViewModel().FillBy2(albumItem as Album);
 
-                    albumVM.Uri = _pathProvider.GetAlbumUri(albumItem as Album);
+                    albumVM.Url = _pathProvider.GetAlbumUri(albumItem as Album);
 
                     AlbumItems.Add(albumVM);
                 }

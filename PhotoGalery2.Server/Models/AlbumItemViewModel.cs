@@ -22,7 +22,7 @@ namespace PhotoGalery2.Server.Models
         public string Name { get; set; }
 
         [DataMember]
-        public Uri Uri { get; set; }
+        public Uri Url { get; set; }
 
         public void FillBy(AlbumItem model)
         {
