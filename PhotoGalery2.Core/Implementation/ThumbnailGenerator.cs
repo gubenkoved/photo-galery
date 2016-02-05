@@ -44,7 +44,10 @@ namespace PhotoGalery2.Core.Implementation
                 }
                 else // image already with allowed size
                 {
+                    origImageStream.Seek(0, SeekOrigin.Begin);
                     origImageStream.CopyTo(resizedImageStream);
+
+                    resizedImageStream.Seek(0, SeekOrigin.Begin);
 
                     resultSize = new Size(rawImage.Width, rawImage.Height);
 
