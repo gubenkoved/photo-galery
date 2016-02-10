@@ -3,12 +3,15 @@
     'appRoot': 'http://localhost:55196/api'
 };
 
-function AlbumsService() {
-    this.getRoot() = function () {
-        return 'Hello there ' + name;
-    };
-}
+angular.module('app', [])
+  .service('AlbumsService', ["$http", function ($http)
+  {
+      
+  }]);
 
-angular
-  .module('app')
-  .service('AlbumsService', AlbumsService);
+/* APP RUN */
+
+angular.module('app')
+    .run(['$rootScope', function ($rootScope) {
+        $rootScope.hello = 'Hello World!'
+    }]);
