@@ -9,8 +9,15 @@
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 </head>
 <body>
-    <div>
-        {{ hello }}
+    <div id="main"
+         ng-controller="AlbumsController as albums"
+         ng-init="getRootItems()">
+
+        <div ng-repeat="item in albumItems">
+            <a data-ng-href="{{ item.Url }}">{{ item.Name }}</a>    
+        </div>
+
+        <!--<button ng-click="getRootItems()">Test</button>-->
     </div>
 </body>
 </html>
