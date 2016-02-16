@@ -95,7 +95,7 @@
     <Content Include="bootstrap\js\bootstrap.js" />
     <Content Include="bootstrap\js\bootstrap.min.js" />
     <Content Include="bootstrap\js\npm.js" />
-    <Content Include="home.html" />
+    <Content Include="index.html" />
     <Content Include="ng\angular.min.js" />
     <Content Include="styles\style.css" />
     <Content Include="Web.config" />
