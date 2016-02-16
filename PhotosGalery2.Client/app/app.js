@@ -67,9 +67,18 @@ app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope,
     {
         $scope.getAlbum = function(albumUrl)
         {
+            var rid = $scope.nextRequestId();
+            $scope.waitingForRequestId = rid;
+
             return AlbumsService.getAlbumItems(albumUrl).then(function (albumModel)
             {
-                $scope.currentAlbum = albumModel
+                if ($scope.waitingForRequestId === rid)
+                {
+                    $scope.currentAlbum = albumModel
+                } else
+                {
+                    console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
+                }
             });
         }
 
@@ -83,5 +92,13 @@ app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope,
 
 angular.module('app')
     .run(['$rootScope', function ($rootScope) {
-        $rootScope.hello = 'Hello World!'
+        
+        $rootScope.lastRequestId = 0;
+
+        $rootScope.nextRequestId = function()
+        {
+            $rootScope.lastRequestId += 1;
+
+            return $rootScope.lastRequestId;
+        }
     }]);

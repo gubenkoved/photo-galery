@@ -45,6 +45,8 @@ namespace PhotoGalery2.Server.Controllers
         [Route("{albumPath}")]
         public AlbumViewModelExtended GetAlbum(string albumPath)
         {
+            //System.Threading.Thread.Sleep(3000);
+
             var metadataProvider = _factory.GetMetadataProvider();
 
             var album = _albumItemsPathProvider.FindByAlbumPath(metadataProvider.GetRoot(), albumPath);
