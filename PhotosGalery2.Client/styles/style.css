@@ -1,2 +1,13 @@
 ﻿body {
 }
+
+.albumItem
+{
+	display: inline-block;
+	margin: 5px;
+}
+
+.albumItem .thumbnail
+{
+	display: block;
+}

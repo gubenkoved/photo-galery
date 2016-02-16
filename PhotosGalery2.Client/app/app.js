@@ -3,7 +3,7 @@
 app.constant('config',
     {
         apiRoot: 'http://localhost:55196/api',
-        ver: '1.0.0.0'
+        ver: '1.0.0.0',
     });
 
 app.service('AlbumsService', ["$http", "config", function ($http, config)

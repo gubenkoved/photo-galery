@@ -11,7 +11,7 @@ namespace PhotoGalery2.Server.Models
          IViewModelFilledInByModel<AlbumContentItem>
     {
         [DataMember]
-        public Uri ThumUrl { get; set; }
+        public Uri ThumbUrl { get; set; }
 
         public void FillBy(AlbumContentItem model)
         {

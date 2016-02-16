@@ -54,7 +54,7 @@ namespace PhotoGalery2.Server.Models
                     var contentItemVM = new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
 
                     contentItemVM.Url = _pathProvider.GetContentItemUri(albumItem as AlbumContentItem);
-                    contentItemVM.ThumUrl = _pathProvider.GetContentItemThumbUri(albumItem as AlbumContentItem, new Size(200, 200));
+                    contentItemVM.ThumbUrl = _pathProvider.GetContentItemThumbUri(albumItem as AlbumContentItem, new Size(200, 200));
 
                     ContentItems.Add(contentItemVM);
                 }
