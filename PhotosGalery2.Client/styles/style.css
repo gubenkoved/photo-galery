@@ -1,13 +1,14 @@
-﻿body {
+﻿body
+{
 }
 
-.albumItem
+.contentItem
 {
 	display: inline-block;
 	margin: 5px;
 }
 
-.albumItem .thumbnail
+.contentItem .thumbnail
 {
 	display: block;
 }

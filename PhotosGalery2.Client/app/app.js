@@ -88,9 +88,21 @@ app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope,
         }
     }]);
 
+app.directive('contentItem', function() {
+    return {
+        // scope: {
+        //     item: '='
+        // },
+        templateUrl: '/app/directives/contentItem.html'
+  };
+});
+
 app.directive('albumItem', function() {
-  return {
-      templateUrl: '/app/directives/albumItem.html'
+    return {
+         // scope: {
+         //   item: '='
+         // },
+        templateUrl: '/app/directives/albumItem.html'
   };
 });
 

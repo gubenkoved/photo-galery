@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\directives\albumItem.html" />
+    <Content Include="app\directives\contentItem.html" />
     <Content Include="ng\angular.js" />
     <Content Include="packages.config" />
     <Content Include="bootstrap\css\bootstrap-theme.css.map" />

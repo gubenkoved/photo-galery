@@ -19,13 +19,11 @@
 
         <h4>albums</h4>
 
-        <div ng-repeat="albumItem in currentAlbum.albumItems">
-            <a ng-click="getAlbum(albumItem.url)">{{ albumItem.name }}</a>    
-        </div>
+        <album:item ng-repeat="item in currentAlbum.albumItems"> </album:item>
 
         <h4>content items</h4>
 
-        <album:item ng-repeat="item in currentAlbum.contentItems" />
+        <content:item ng-repeat="item in currentAlbum.contentItems"></content:item>
     </div>
 </body>
 </html>
