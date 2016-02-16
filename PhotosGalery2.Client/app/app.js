@@ -88,6 +88,12 @@ app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope,
         }
     }]);
 
+app.directive('albumItem', function() {
+  return {
+      templateUrl: '/app/directives/albumItem.html'
+  };
+});
+
 /* APP RUN */
 
 angular.module('app')
