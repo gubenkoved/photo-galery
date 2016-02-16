@@ -21,7 +21,7 @@ namespace PhotoGalery2.Server.Models
         public List<AlbumContentItemViewModel> ContentItems { get; set; }
 
         [DataMember]
-        public Uri ParentAlbumUri { get; set; }
+        public Uri ParentUrl { get; set; }
 
         public AlbumViewModelExtended(AlbumItemsPathProvider pathProvider)
         {
@@ -42,7 +42,7 @@ namespace PhotoGalery2.Server.Models
 
             if (model.ParentAlbum != null)
             {
-                ParentAlbumUri = _pathProvider.GetAlbumUri(model.ParentAlbum);
+                ParentUrl = _pathProvider.GetAlbumUri(model.ParentAlbum);
             }
 
             Url = _pathProvider.GetAlbumUri(model);

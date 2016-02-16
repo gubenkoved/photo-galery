@@ -11,13 +11,23 @@
 <body>
     <div id="main"
          ng-controller="AlbumsController as albums"
-         ng-init="getRootItems()">
+         ng-init="getAlbum()">
 
-        <div ng-repeat="item in albumItems">
-            <a data-ng-href="{{ item.Url }}">{{ item.Name }}</a>    
+        <button ng-click="getParentAlbum()">Parent album</button>
+
+        <br />
+
+        <h4>albums</h4>
+
+        <div ng-repeat="albumItem in currentAlbum.albumItems">
+            <a ng-click="getAlbum(albumItem.url)">{{ albumItem.name }}</a>    
         </div>
 
-        <!--<button ng-click="getRootItems()">Test</button>-->
+        <h4>content items</h4>
+
+        <div ng-repeat="contentItem in currentAlbum.contentItems">
+            <a href="{{contentItem.url}}">{{ contentItem.name }}</a>    
+        </div>
     </div>
 </body>
 </html>
