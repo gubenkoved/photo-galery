@@ -12,3 +12,14 @@
 {
 	display: block;
 }
+
+.albumItem a
+{
+	cursor: pointer;
+	border-bottom: dotted 1px black;
+}
+
+.albumItem a:hover
+{
+	border-bottom: solid 1px black;
+}
