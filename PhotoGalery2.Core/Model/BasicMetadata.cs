@@ -7,12 +7,9 @@ using System.Threading.Tasks;
 
 namespace PhotoGalery2.Core
 {
-    /// <summary>
-    /// Material content of a library that could be displayed.
-    /// </summary>
     [DataContract]
-    public abstract class AlbumContentItem : AlbumItem
+    public class BasicMetadata : IMetadata
     {
-        public IEnumerable<IMetadata> Metatdata { get; set; }
+        public Size Size { get; set; }
     }
 }

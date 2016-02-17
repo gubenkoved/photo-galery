@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,9 @@ namespace PhotoGalery2.Core.Implementation.Naive
 {
     public class NaiveMetadataProvider : MetadataProvider
     {
+        private static MemoryCache _metadataCache = new MemoryCache("NaiveMetadataProvider.MetadataCache");
+        private TimeSpan _metadataCacheTTL = TimeSpan.FromMinutes(60);
+
         public IEnumerable<string> Extensions { get; set; }
         public string RootPath { get; private set; }
 
@@ -74,10 +78,23 @@ namespace PhotoGalery2.Core.Implementation.Naive
             {
                 var fileInfo = new System.IO.FileInfo(filePath);
 
+                var basicMedatdata = _metadataCache.Get(filePath) as BasicMetadata;
+                if (basicMedatdata == null)
+                {
+                    basicMedatdata = ImageMethods.GetBasicMetadata(filePath);
+                    _metadataCache.Add(filePath, basicMedatdata, DateTimeOffset.UtcNow.Add(_metadataCacheTTL));
+                }
+
+                var contentItemMetadata = new List<IMetadata>()
+                {
+                    basicMedatdata,
+                };
+    
                 yield return new Photo()
                 {
                     Id = fileInfo.Name,
                     Name = fileInfo.Name,
+                    Metatdata = contentItemMetadata,
                 };
             }
         }

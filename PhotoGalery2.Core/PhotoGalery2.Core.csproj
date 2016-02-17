@@ -33,6 +33,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -49,11 +50,13 @@
     <Compile Include="Implementation\Naive\NaiveContentProvider.cs" />
     <Compile Include="Implementation\Naive\NaiveMetadataProvider.cs" />
     <Compile Include="Implementation\Naive\NaivePhotoGaleryFactory.cs" />
-    <Compile Include="Implementation\ThumbnailGenerator.cs" />
+    <Compile Include="Implementation\ImageMethods.cs" />
     <Compile Include="MetadataProvider.cs" />
     <Compile Include="Model\Album.cs" />
     <Compile Include="Model\AlbumContentItem.cs" />
     <Compile Include="Model\AlbumItem.cs" />
+    <Compile Include="Model\IMetadata.cs" />
+    <Compile Include="Model\BasicMetadata.cs" />
     <Compile Include="Model\Photo.cs" />
     <Compile Include="PhotoGaleryFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

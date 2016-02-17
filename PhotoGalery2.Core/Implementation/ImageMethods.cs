@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PhotoGalery2.Core.Implementation
 {
-    public class ThumbnailGenerator
+    internal class ImageMethods
     {
-        public Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
+        public static Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
         {
             var resizedImageStream = new MemoryStream();
             using (Image rawImage = Image.FromStream(origImageStream))
@@ -56,7 +56,26 @@ namespace PhotoGalery2.Core.Implementation
             }
         }
 
-        private void CalcTargetSize(int width, int height, Size maxSize, out int newWidth, out int newHeight)
+        public static BasicMetadata GetBasicMetadata(string filePath)
+        {
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return GetBasicMetadata(stream);
+            }
+        }
+
+        public static BasicMetadata GetBasicMetadata(Stream imageStream)
+        {
+            using (Image rawImage = Image.FromStream(imageStream))
+            {
+                return new BasicMetadata()
+                {
+                    Size = new Size(rawImage.Width, rawImage.Height),
+                };
+            }
+        }
+
+        private static void CalcTargetSize(int width, int height, Size maxSize, out int newWidth, out int newHeight)
         {
             float aspect = width / (float)height;
 

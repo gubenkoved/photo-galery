@@ -62,7 +62,7 @@ namespace PhotoGalery2.Test
             var metadataProvider = _factory.GetMetadataProvider();
 
             var rootAlbums = metadataProvider.GetRoot();
-        
+
             Assert.IsNull(rootAlbums.ParentAlbum);
         }
 
@@ -77,6 +77,25 @@ namespace PhotoGalery2.Test
                 .SingleOrDefault(a => a.Name == "A2");
 
             Assert.AreEqual(root, a2Album.ParentAlbum);
+        }
+
+        [TestMethod]
+        public void BasicMetadataPopulatedTest()
+        {
+            var metadataProvider = _factory.GetMetadataProvider();
+
+            var root = metadataProvider.GetRoot();
+
+            var itemMetadata = root.Items.OfType<AlbumContentItem>()
+                .Single()
+                .Metatdata;
+
+            var basicMetadata = itemMetadata.OfType<BasicMetadata>().SingleOrDefault();
+
+            Assert.IsNotNull(basicMetadata);
+
+            Assert.IsTrue(basicMetadata.Size.Width > 0);
+            Assert.IsTrue(basicMetadata.Size.Height > 0);
         }
     }
 }

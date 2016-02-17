@@ -49,10 +49,8 @@ namespace PhotoGalery2.Core.Implementation.Naive
             string path;
             using (FileStream origContentStream = GetFileStreamFor(album, contentItemId, out path))
             {
-                var thumbGen = new ThumbnailGenerator();
-
                 Size resultSize;
-                Stream thumbStream = thumbGen.GenerateThumbinail(origContentStream, thumbSize, out resultSize);
+                Stream thumbStream = ImageMethods.GenerateThumbinail(origContentStream, thumbSize, out resultSize);
 
                 // save in cache
                 if (!Directory.Exists(ThumbCacheDir))
@@ -105,7 +103,6 @@ namespace PhotoGalery2.Core.Implementation.Naive
             return result;
         }
             
-
         private FileStream GetFileStreamFor(Album album, string contentItemId, out string path)
         {
             if (!(album is NaiveAlbum))
