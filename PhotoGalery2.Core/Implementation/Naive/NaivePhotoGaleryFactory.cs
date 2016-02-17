@@ -26,7 +26,10 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
         public override ContentProvider GetContentProvider()
         {
-            return new NaiveContentProvider();
+            return new NaiveContentProvider()
+            {
+                ThumbCacheDir = Settings.ThumbCacheDir,
+            };
         }
 
         public override MetadataProvider GetMetadataProvider()

@@ -24,6 +24,7 @@ namespace PhotoGalery2.Server
                 {
                     RootDir = @"C:\Users\nrj\Documents\Dropbox\Photos",
                     Extensions = new[] { ".jpg", ".jpeg", ".bmp" },
+                    ThumbCacheDir = @"C:\temp\photo-gallery-thumbs-cache"
                 }));
 
             IoC.Container.RegisterType<AlbumItemsPathProvider, DefaultAlbumItemsPathProvider>();
