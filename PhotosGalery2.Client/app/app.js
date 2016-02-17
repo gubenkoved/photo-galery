@@ -86,23 +86,43 @@ app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope,
         {
             $scope.getAlbum($scope.currentAlbum.parentUrl);
         }
+
+        $scope.onAlbumClick = function (album)
+        {
+            $scope.getAlbum(album.url);
+        }
+
+        $scope.debug = function (o)
+        {
+            console.log(o);
+        }
     }]);
 
 app.directive('contentItem', function() {
     return {
-        // scope: {
-        //     item: '='
-        // },
+        scope: {
+             item: '='
+        },
         templateUrl: '/app/directives/contentItem.html'
   };
 });
 
 app.directive('albumItem', function() {
     return {
-         // scope: {
-         //   item: '='
-         // },
+         scope: {
+            item: '=',
+            click: '&onClick'
+         },
         templateUrl: '/app/directives/albumItem.html'
+  };
+});
+
+app.directive('test', function() {
+    return {
+         scope: {
+             testFunc: '&onClick'
+         },
+        templateUrl: '/app/directives/test.html'
   };
 });
 

@@ -19,11 +19,13 @@
 
         <h4>albums</h4>
 
-        <album:item ng-repeat="item in currentAlbum.albumItems"> </album:item>
+        <album:item ng-repeat="albumItem in currentAlbum.albumItems"
+            item="albumItem" on-click="onAlbumClick(albumItem)"></album:item>
 
         <h4>content items</h4>
 
-        <content:item ng-repeat="item in currentAlbum.contentItems"></content:item>
+        <content:item ng-repeat="contentItem in currentAlbum.contentItems"
+            item="contentItem"></content:item>
     </div>
 </body>
 </html>
