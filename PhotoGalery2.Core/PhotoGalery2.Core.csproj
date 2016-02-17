@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AlbumItemContentResult.cs" />
     <Compile Include="ContentProvider.cs" />
+    <Compile Include="Implementation\Naive\NaivePhoto.cs" />
     <Compile Include="Implementation\Naive\NaiveAlbum.cs" />
     <Compile Include="Implementation\Naive\NaiveContentProvider.cs" />
     <Compile Include="Implementation\Naive\NaiveMetadataProvider.cs" />

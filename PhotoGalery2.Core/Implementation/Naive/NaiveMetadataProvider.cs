@@ -78,25 +78,30 @@ namespace PhotoGalery2.Core.Implementation.Naive
             {
                 var fileInfo = new System.IO.FileInfo(filePath);
 
-                var basicMedatdata = _metadataCache.Get(filePath) as BasicMetadata;
-                if (basicMedatdata == null)
-                {
-                    basicMedatdata = ImageMethods.GetBasicMetadata(filePath);
-                    _metadataCache.Add(filePath, basicMedatdata, DateTimeOffset.UtcNow.Add(_metadataCacheTTL));
-                }
-
-                var contentItemMetadata = new List<IMetadata>()
-                {
-                    basicMedatdata,
-                };
-    
-                yield return new Photo()
+                yield return new NaivePhoto()
                 {
                     Id = fileInfo.Name,
                     Name = fileInfo.Name,
-                    Metatdata = contentItemMetadata,
+                    LazyMetadata = new Lazy<IEnumerable<IMetadata>>(() => PopulateMetadataFor(filePath)),
                 };
             }
+        }
+
+        private IEnumerable<IMetadata> PopulateMetadataFor(string filePath)
+        {
+            var basicMedatdata = _metadataCache.Get(filePath) as BasicMetadata;
+            if (basicMedatdata == null)
+            {
+                basicMedatdata = ImageMethods.GetBasicMetadata(filePath);
+                _metadataCache.Add(filePath, basicMedatdata, DateTimeOffset.UtcNow.Add(_metadataCacheTTL));
+            }
+
+            var contentItemMetadata = new List<IMetadata>()
+            {
+                basicMedatdata,
+            };
+
+            return contentItemMetadata;
         }
     }
 }
