@@ -1,0 +1,3 @@
+﻿Make directive to sort out album items to make a neat view
+Try Angular Material Design: https://material.angularjs.org/latest/
+Add client routes to save app state

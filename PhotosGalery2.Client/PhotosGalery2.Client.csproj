@@ -78,6 +78,7 @@
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="ToDo.txt" />
     <Content Include="_references.js" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
