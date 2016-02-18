@@ -13,7 +13,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
         private static ILog _log = LogManager.GetLogger<ImageMethods>();
         private static MemoryCache _metadataCache = new MemoryCache("NaiveMetadataProvider.MetadataCache");
 
-        private TimeSpan _metadataCacheTTL = TimeSpan.FromMinutes(60);
+        private TimeSpan _metadataCacheTTL = TimeSpan.FromMinutes(15);
 
         public IEnumerable<string> Extensions { get; set; }
         public string RootPath { get; private set; }
@@ -30,6 +30,22 @@ namespace PhotoGalery2.Core.Implementation.Naive
         }
         
         public override Album GetRoot()
+        {
+            Album root;
+
+            root = _metadataCache.Get("root-album") as Album;
+
+            if (root == null)
+            {
+                root = GetRootImpl();
+
+                _metadataCache.Add("root-album", root, DateTimeOffset.Now.Add(_metadataCacheTTL));
+            }
+
+            return root;
+        }
+
+        private Album GetRootImpl()
         {
             var rootAlbum = new NaiveAlbum()
             {
