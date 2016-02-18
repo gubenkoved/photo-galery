@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace PhotoGalery2.Core
 {
+    [DebuggerDisplay("{Width}x{Height}")]
     [DataContract]
     public struct Size
     {
@@ -34,5 +36,9 @@ namespace PhotoGalery2.Core
             }
         }
 
+        public override string ToString()
+        {
+            return $"{Width}x{Height}";
+        }
     }
 }

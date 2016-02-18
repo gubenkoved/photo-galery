@@ -23,8 +23,9 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
         public override AlbumItemContentResult GetOrigContent(Album album, string contentItemId)
         {
-            string path;
-            FileStream origContentStream = GetFileStreamFor(album, contentItemId, out path);
+            string path = GetFilePathFor(album, contentItemId);
+
+            FileStream origContentStream = GetFileStreamFor(path);
 
             return new AlbumItemContentResult(
                 contentStream: origContentStream,
@@ -46,31 +47,29 @@ namespace PhotoGalery2.Core.Implementation.Naive
                     mimeType: MimeMapping.GetMimeMapping(thumbPath));
             }
 
-            string path;
-            using (FileStream origContentStream = GetFileStreamFor(album, contentItemId, out path))
+            string path = GetFilePathFor(album, contentItemId);
+
+            Size resultSize;
+            Stream thumbStream = ImageMethods.GenerateThumbinail(path, thumbSize, out resultSize);
+
+            // save in cache
+            if (!Directory.Exists(ThumbCacheDir))
             {
-                Size resultSize;
-                Stream thumbStream = ImageMethods.GenerateThumbinail(origContentStream, thumbSize, out resultSize);
-
-                // save in cache
-                if (!Directory.Exists(ThumbCacheDir))
-                {
-                    Directory.CreateDirectory(ThumbCacheDir);
-                }
-
-                using (var fileStream = File.Create(thumbPath))
-                {
-                    thumbStream.Seek(0, SeekOrigin.Begin);
-                    thumbStream.CopyTo(fileStream);
-                }
-
-                thumbStream.Seek(0, SeekOrigin.Begin);
-
-                return new AlbumItemContentResult(
-                    contentStream: thumbStream,
-                    size: resultSize,
-                    mimeType: MimeMapping.GetMimeMapping(path));
+                Directory.CreateDirectory(ThumbCacheDir);
             }
+
+            using (var fileStream = File.Create(thumbPath))
+            {
+                thumbStream.Seek(0, SeekOrigin.Begin);
+                thumbStream.CopyTo(fileStream);
+            }
+
+            thumbStream.Seek(0, SeekOrigin.Begin);
+
+            return new AlbumItemContentResult(
+                contentStream: thumbStream,
+                size: resultSize,
+                mimeType: MimeMapping.GetMimeMapping(path));
         }
 
         private string GetCachedThumbPathFor(Album album, string contentItemId, Size thumbSize)
@@ -103,7 +102,14 @@ namespace PhotoGalery2.Core.Implementation.Naive
             return result;
         }
             
-        private FileStream GetFileStreamFor(Album album, string contentItemId, out string path)
+        private FileStream GetFileStreamFor(string path)
+        {
+            var fileStream = new System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            return fileStream;
+        }
+
+        private string GetFilePathFor(Album album, string contentItemId)
         {
             if (!(album is NaiveAlbum))
             {
@@ -112,11 +118,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
             var nAlbum = album as NaiveAlbum;
 
-            path = System.IO.Path.Combine(nAlbum.PhysicalDir, contentItemId);
-
-            var fileStream = new System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            return fileStream;
+            return System.IO.Path.Combine(nAlbum.PhysicalDir, contentItemId);
         }
     }
 }

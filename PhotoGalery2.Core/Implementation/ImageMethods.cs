@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Logging;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -10,7 +11,19 @@ namespace PhotoGalery2.Core.Implementation
 {
     internal class ImageMethods
     {
-        public static Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
+        private static ILog _log = LogManager.GetLogger<ImageMethods>();
+
+        public static Stream GenerateThumbinail(string path, Size maxSize, out Size resultSize)
+        {
+            _log.Debug(x => x("generating thumbnail for '{0}', max size={1}", path, maxSize));
+
+            using (var fileStream = new System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return GenerateThumbinail(fileStream, maxSize, out resultSize);
+            }
+        }
+
+        private static Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
         {
             var resizedImageStream = new MemoryStream();
             using (Image rawImage = Image.FromStream(origImageStream))
@@ -56,15 +69,17 @@ namespace PhotoGalery2.Core.Implementation
             }
         }
 
-        public static BasicMetadata GetBasicMetadata(string filePath)
+        public static BasicMetadata GetBasicMetadata(string path)
         {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            _log.Debug(x => x("populating basic metadata for '{0}'", path));
+
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return GetBasicMetadata(stream);
             }
         }
 
-        public static BasicMetadata GetBasicMetadata(Stream imageStream)
+        private static BasicMetadata GetBasicMetadata(Stream imageStream)
         {
             using (Image rawImage = Image.FromStream(imageStream))
             {

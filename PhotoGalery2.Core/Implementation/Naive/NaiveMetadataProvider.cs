@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
@@ -9,7 +10,9 @@ namespace PhotoGalery2.Core.Implementation.Naive
 {
     public class NaiveMetadataProvider : MetadataProvider
     {
+        private static ILog _log = LogManager.GetLogger<ImageMethods>();
         private static MemoryCache _metadataCache = new MemoryCache("NaiveMetadataProvider.MetadataCache");
+
         private TimeSpan _metadataCacheTTL = TimeSpan.FromMinutes(60);
 
         public IEnumerable<string> Extensions { get; set; }
@@ -35,13 +38,25 @@ namespace PhotoGalery2.Core.Implementation.Naive
                 PhysicalDir = RootPath,
             };
 
-            rootAlbum.Items = GetItemsRecoursive(rootAlbum, RootPath);
+            int dirsTraversed = 0;
+            int contentItemsTraversed = 0;
+
+            _log.Info(x => x("Populating items recursively in {0}", RootPath));
+
+            rootAlbum.Items = GetItemsRecoursive(rootAlbum, RootPath, ref dirsTraversed, ref contentItemsTraversed);
+
+            _log.Info(x => x("Traversed {0} directories and {1} content files", dirsTraversed, contentItemsTraversed));
 
             return rootAlbum;
         }
 
-        private IEnumerable<AlbumItem> GetItemsRecoursive(Album currentAlbum, string currentDir)
+        private IEnumerable<AlbumItem> GetItemsRecoursive(Album currentAlbum, string currentDir,
+            ref int dirsTraversed, ref int contentItemsTraversed)
         {
+            dirsTraversed += 1;
+
+            var result = new List<AlbumItem>();
+
             string[] subDirs = System.IO.Directory.GetDirectories(currentDir);
 
             foreach (var subDir in subDirs)
@@ -56,21 +71,27 @@ namespace PhotoGalery2.Core.Implementation.Naive
                     PhysicalDir = subDir,
                 };
 
-                subAlbum.Items = GetItemsRecoursive(subAlbum, subDir);
+                subAlbum.Items = GetItemsRecoursive(subAlbum, subDir, ref dirsTraversed, ref contentItemsTraversed);
 
-                yield return subAlbum;
+                result.Add(subAlbum);
             }
 
             foreach(var photo in GetPhotosStraghtIn(currentDir))
             {
                 photo.ParentAlbum = currentAlbum;
 
-                yield return photo;
+                contentItemsTraversed += 1;
+
+                result.Add(photo);
             }
+
+            return result;
         }
 
         private IEnumerable<Photo> GetPhotosStraghtIn(string dir)
         {
+            var result = new List<Photo>();
+
             foreach(var filePath in System.IO.Directory
                 .EnumerateFiles(dir)
                 .Where(file => Extensions.Any(ext => file.ToLower().EndsWith(ext)))
@@ -78,13 +99,15 @@ namespace PhotoGalery2.Core.Implementation.Naive
             {
                 var fileInfo = new System.IO.FileInfo(filePath);
 
-                yield return new NaivePhoto()
+                result.Add(new NaivePhoto()
                 {
                     Id = fileInfo.Name,
                     Name = fileInfo.Name,
                     LazyMetadata = new Lazy<IEnumerable<IMetadata>>(() => PopulateMetadataFor(filePath)),
-                };
+                });
             }
+
+            return result;
         }
 
         private IEnumerable<IMetadata> PopulateMetadataFor(string filePath)
