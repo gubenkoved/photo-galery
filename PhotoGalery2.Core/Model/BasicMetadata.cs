@@ -10,6 +10,6 @@ namespace PhotoGalery2.Core
     [DataContract]
     public class BasicMetadata : IMetadata
     {
-        public Size Size { get; set; }
+        public Size OrigSize { get; set; }
     }
 }

@@ -88,14 +88,14 @@ namespace PhotoGalery2.Test
 
             var itemMetadata = root.Items.OfType<AlbumContentItem>()
                 .Single()
-                .Metatdata;
+                .MetatdataCollection;
 
             var basicMetadata = itemMetadata.OfType<BasicMetadata>().SingleOrDefault();
 
             Assert.IsNotNull(basicMetadata);
 
-            Assert.IsTrue(basicMetadata.Size.Width > 0);
-            Assert.IsTrue(basicMetadata.Size.Height > 0);
+            Assert.IsTrue(basicMetadata.OrigSize.Width > 0);
+            Assert.IsTrue(basicMetadata.OrigSize.Height > 0);
         }
     }
 }

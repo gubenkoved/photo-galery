@@ -37,7 +37,9 @@ app.service('AlbumsService', ["$http", "config", function ($http, config)
                 {
                     name: apiResponse.ContentItems[i].Name,
                     url: apiResponse.ContentItems[i].Url,
-                    thumbUrl: apiResponse.ContentItems[i].ThumbUrl
+                    thumbUrl: apiResponse.ContentItems[i].ThumbUrl,
+                    width: apiResponse.ContentItems[i].Width,
+                    height: apiResponse.ContentItems[i].Height,
                 });
         }
 

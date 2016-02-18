@@ -12,7 +12,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
         internal Lazy<IEnumerable<IMetadata>> LazyMetadata { get; set; }
 
-        public override IEnumerable<IMetadata> Metatdata
+        public override IEnumerable<IMetadata> MetatdataCollection
         {
             get
             {

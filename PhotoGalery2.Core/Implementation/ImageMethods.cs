@@ -77,15 +77,19 @@ namespace PhotoGalery2.Core.Implementation
             {
                 return GetBasicMetadata(stream);
             }
+
+            _log.Debug(x => x("populated basic metadata for '{0}'", path));
         }
 
         private static BasicMetadata GetBasicMetadata(Stream imageStream)
         {
-            using (Image rawImage = Image.FromStream(imageStream))
+            // trying to make image load faster
+            // http://stackoverflow.com/questions/552467/how-do-i-reliably-get-an-image-dimensions-in-net-without-loading-the-image
+            using (Image rawImage = Image.FromStream(imageStream, false, false))
             {
                 return new BasicMetadata()
                 {
-                    Size = new Size(rawImage.Width, rawImage.Height),
+                    OrigSize = new Size(rawImage.Width, rawImage.Height),
                 };
             }
         }

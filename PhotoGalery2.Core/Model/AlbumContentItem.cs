@@ -13,6 +13,14 @@ namespace PhotoGalery2.Core
     [DataContract]
     public abstract class AlbumContentItem : AlbumItem
     {
-        public virtual IEnumerable<IMetadata> Metatdata { get; set; }
+        public virtual IEnumerable<IMetadata> MetatdataCollection { get; set; }
+
+        public BasicMetadata BasicMetadata
+        {
+            get
+            {
+                return MetatdataCollection.OfType<BasicMetadata>().FirstOrDefault();
+            }
+        }
     }
 }
