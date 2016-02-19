@@ -4,3 +4,4 @@
 /// <reference path="bootstrap/js/bootstrap.js" />
 /// <reference path="bootstrap/js/npm.js" />
 /// <reference path="ng/angular.js" />
+/// <reference path="ng/angular-route.js" />

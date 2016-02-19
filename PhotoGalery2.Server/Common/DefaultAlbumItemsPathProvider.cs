@@ -10,7 +10,7 @@ namespace PhotoGalery2.Server.Common
     {
         public const string Separator = ":";
 
-        protected override string ConstructAlbumPathSegment(Album album)
+        public override string ConstructAlbumPathSegment(Album album)
         {
             string path = string.Empty;
 
@@ -31,7 +31,7 @@ namespace PhotoGalery2.Server.Common
             return path;
         }
 
-        protected override string ConstructContentItemPathSegment(AlbumContentItem contentItem)
+        public override string ConstructContentItemPathSegment(AlbumContentItem contentItem)
         {
             return contentItem.Id;
         }

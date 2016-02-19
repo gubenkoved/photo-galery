@@ -5,27 +5,14 @@
     <meta charset="utf-8" />
     
     <script src="ng/angular.min.js"> </script>
+    <script src="ng/angular-route.min.js"> </script>
     <script src="app/app.js"> </script>
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 </head>
 <body>
-    <div id="main"
-         ng-controller="AlbumsController as albums"
-         ng-init="getAlbum()">
 
-        <button ng-click="getParentAlbum()">Parent album</button>
-
-        <br />
-
-        <h4>albums</h4>
-
-        <album:item ng-repeat="albumItem in currentAlbum.albumItems"
-            item="albumItem" on-click="onAlbumClick(albumItem)"></album:item>
-
-        <h4>content items</h4>
-
-        <content:item ng-repeat="contentItem in currentAlbum.contentItems"
-            item="contentItem"></content:item>
+    <div id="main">
+        <div ng-view></div>
     </div>
 </body>
 </html>

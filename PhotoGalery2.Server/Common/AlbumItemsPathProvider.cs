@@ -12,11 +12,11 @@ namespace PhotoGalery2.Server
 
         public abstract Album FindByAlbumPath(Album album, string albumPath);
 
-        protected abstract string ConstructAlbumPathSegment(Album album);
+        public abstract string ConstructAlbumPathSegment(Album album);
 
         public abstract AlbumContentItem FindByContentItemId(Album album, string contentItemId);
 
-        protected abstract string ConstructContentItemPathSegment(AlbumContentItem contentItem);
+        public abstract string ConstructContentItemPathSegment(AlbumContentItem contentItem);
 
         public Uri GetAlbumUri(Album album)
         {

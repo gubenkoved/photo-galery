@@ -1,0 +1,17 @@
+﻿<div ng-controller="AlbumsController as albums"
+     ng-init="init()">
+
+    <button ng-click="getParentAlbum()">Parent album</button>
+
+    <br />
+
+    <h4>albums</h4>
+
+    <album:item ng-repeat="albumItem in currentAlbum.albumItems"
+                item="albumItem" on-click="onAlbumClick(albumItem)"></album:item>
+
+    <h4>content items</h4>
+
+    <content:item ng-repeat="contentItem in currentAlbum.contentItems"
+                  item="contentItem"></content:item>
+</div>

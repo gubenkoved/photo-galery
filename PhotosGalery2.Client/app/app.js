@@ -1,12 +1,30 @@
-﻿var app = angular.module('app', []);
+﻿var app = angular.module('app', ['ngRoute']);
+
+app.config(['$routeProvider',
+  function ($routeProvider) {
+      $routeProvider.
+        when('/albums/:albumPath?', {
+            templateUrl: 'views/albums.html',
+            controller: 'AlbumsController'
+        }).
+        when('/about', {
+            templateUrl: 'views/about.html',
+            controller: 'AboutController'
+        }).
+        otherwise({
+            redirectTo: '/albums'
+        });
+  }]);
 
 app.constant('config',
-    {
-        apiRoot: 'http://localhost:55196/api',
-        ver: '1.0.0.0',
-    });
+{
+    apiRoot: 'http://localhost:55196/api',
+    ver: '1.0.0.0',
+});
 
-app.service('AlbumsService', ["$http", "config", function ($http, config)
+/* SERVICES */
+
+app.service('AlbumsService', ["$http", "config", "$q", function ($http, config, $q)
   {
     var service = {};
 
@@ -17,6 +35,7 @@ app.service('AlbumsService', ["$http", "config", function ($http, config)
             name: apiResponse.Name,
             url: apiResponse.Url,
             parentUrl: apiResponse.ParentUrl,
+            fullPath: apiResponse.FullPath,
 
             albumItems: [],
             contentItems: []
@@ -62,43 +81,89 @@ app.service('AlbumsService', ["$http", "config", function ($http, config)
             });
     }
 
+    service.resolve = function (albumPath)
+    {
+        console.log('resolve: ' + albumPath);
+
+        if (albumPath)
+        {
+            return $http.get(config.apiRoot + '/resolve/' + albumPath)
+                .then( function (response)
+                {
+                    console.log(response.data);
+
+                    return response.data;
+                });
+        } else
+        {
+            return $q(function(resolve, reject)
+            {
+                resolve(config.apiRoot + '/albums');
+            });
+        }
+    }
+
     return service;
 }]);
 
-app.controller('AlbumsController', ['$scope', 'AlbumsService', function ($scope, AlbumsService)
+/* CONTROLLERS */
+
+app.controller('AlbumsController',
+    ['$scope', '$routeParams', '$route', 'AlbumsService',
+    function ($scope, $routeParams, $route, AlbumsService)
+{
+    $scope.init = function ()
     {
-        $scope.getAlbum = function(albumUrl)
-        {
-            var rid = $scope.nextRequestId();
-            $scope.waitingForRequestId = rid;
-
-            return AlbumsService.getAlbumItems(albumUrl).then(function (albumModel)
+        AlbumsService.resolve($routeParams.albumPath)
+            .then(function (targetAlbumUrl)
             {
-                if ($scope.waitingForRequestId === rid)
-                {
-                    $scope.currentAlbum = albumModel
-                } else
-                {
-                    console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
-                }
+                $scope.getAlbum(targetAlbumUrl);
             });
-        }
+    }
 
-        $scope.getParentAlbum = function()
-        {
-            $scope.getAlbum($scope.currentAlbum.parentUrl);
-        }
+    $scope.getAlbum = function(albumUrl)
+    {
+        var rid = $scope.nextRequestId();
+        $scope.waitingForRequestId = rid;
 
-        $scope.onAlbumClick = function (album)
+        return AlbumsService.getAlbumItems(albumUrl).then(function (albumModel)
         {
-            $scope.getAlbum(album.url);
-        }
+            if ($scope.waitingForRequestId === rid)
+            {
+                var pRoute = $routeParams;
+                pRoute.albumPath = albumModel.fullPath;
+                $route.updateParams(pRoute);
 
-        $scope.debug = function (o)
-        {
-            console.log(o);
-        }
-    }]);
+                $scope.currentAlbum = albumModel
+            } else
+            {
+                console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
+            }
+        });
+    }
+
+    $scope.getParentAlbum = function()
+    {
+        $scope.getAlbum($scope.currentAlbum.parentUrl);
+    }
+
+    $scope.onAlbumClick = function (album)
+    {
+        $scope.getAlbum(album.url);
+    }
+
+    $scope.debug = function (o)
+    {
+        console.log(o);
+    }
+}]);
+
+app.controller('AboutController', ['$scope', 'config', function ($scope, config) {
+    $scope.config = config;
+}]);
+
+
+/* DIRECTIVES */
 
 app.directive('contentItem', function() {
     return {

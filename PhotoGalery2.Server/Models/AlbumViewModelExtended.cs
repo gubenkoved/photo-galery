@@ -15,6 +15,9 @@ namespace PhotoGalery2.Server.Models
         private AlbumItemsPathProvider _pathProvider;
 
         [DataMember]
+        public string FullPath { get; set; }
+
+        [DataMember]
         public List<AlbumViewModel> AlbumItems { get; set; }
 
         [DataMember]
@@ -44,6 +47,8 @@ namespace PhotoGalery2.Server.Models
             {
                 ParentUrl = _pathProvider.GetAlbumUri(model.ParentAlbum);
             }
+
+            FullPath = _pathProvider.ConstructAlbumPathSegment(model);
 
             Url = _pathProvider.GetAlbumUri(model);
 

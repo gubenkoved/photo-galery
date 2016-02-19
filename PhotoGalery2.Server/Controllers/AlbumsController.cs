@@ -11,7 +11,7 @@ using System.Web.Http.Cors;
 namespace PhotoGalery2.Server.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    [RoutePrefix("api/albums")]
+    [RoutePrefix("api")]
     public class AlbumsController : ApiController
     {
         private PhotoGaleryFactory _factory;
@@ -27,7 +27,7 @@ namespace PhotoGalery2.Server.Controllers
         /// Returns light information about all albums items available.
         /// </summary>
         [HttpGet]
-        [Route("")]
+        [Route("albums")]
         public AlbumViewModelExtended GetRoot()
         {
             var metadataProvider = _factory.GetMetadataProvider();
@@ -42,7 +42,7 @@ namespace PhotoGalery2.Server.Controllers
         /// </summary>
         /// <param name="albumPath">Id of album</param>
         [HttpGet]
-        [Route("{albumPath}")]
+        [Route("albums/{albumPath}")]
         public AlbumViewModelExtended GetAlbum(string albumPath)
         {
             //System.Threading.Thread.Sleep(3000);
@@ -64,7 +64,7 @@ namespace PhotoGalery2.Server.Controllers
         /// Returns original content of album content item.
         /// </summary>
         [HttpGet]
-        [Route("{albumPath}/content/{contentItemId}")]
+        [Route("albums/{albumPath}/content/{contentItemId}")]
         public HttpResponseMessage GetAlbumContentItem(
             string albumPath,
             string contentItemId)
@@ -107,7 +107,7 @@ namespace PhotoGalery2.Server.Controllers
         /// Returns original content of album content item.
         /// </summary>
         [HttpGet]
-        [Route("{albumPath}/content/{contentItemId}/thumbnail")]
+        [Route("albums/{albumPath}/content/{contentItemId}/thumbnail")]
         public HttpResponseMessage GetAlbumContentItemThumbnail(
             string albumPath,
             string contentItemId,
@@ -153,6 +153,26 @@ namespace PhotoGalery2.Server.Controllers
             return this.ContentStreamResult(
                 contentResult.Stream,
                 contentResult.MimeType);
+        }
+
+        /// <summary>
+        /// Returns original content of album content item.
+        /// </summary>
+        [HttpGet]
+        [Route("resolve/{albumPath}")]
+        public Uri Resolve(string albumPath)
+        {
+            var metadataProvider = _factory.GetMetadataProvider();
+
+            var album = _albumItemsPathProvider.FindByAlbumPath(metadataProvider.GetRoot(), albumPath);
+
+            if (album == null)
+            {
+                this.ThrowHttpErrorResponseException(HttpStatusCode.NotFound,
+                    $"album with id '{albumPath}' was not found");
+            }
+
+            return _albumItemsPathProvider.GetAlbumUri(album);
         }
     }
 }

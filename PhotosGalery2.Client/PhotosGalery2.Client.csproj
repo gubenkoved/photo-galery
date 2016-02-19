@@ -68,6 +68,8 @@
   <ItemGroup>
     <Content Include="app\directives\albumItem.html" />
     <Content Include="app\directives\contentItem.html" />
+    <Content Include="ng\angular-route.js" />
+    <Content Include="ng\angular-route.min.js" />
     <Content Include="ng\angular.js" />
     <Content Include="packages.config" />
     <Content Include="bootstrap\css\bootstrap-theme.css.map" />
@@ -79,7 +81,10 @@
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="ToDo.txt" />
+    <Content Include="views\about.html" />
+    <Content Include="views\albums.html" />
     <Content Include="_references.js" />
+    <Content Include="ng\angular-route.min.js.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
