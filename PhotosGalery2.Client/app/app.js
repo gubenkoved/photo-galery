@@ -11,15 +11,45 @@ app.config(['$routeProvider',
             templateUrl: 'views/about.html',
             controller: 'AboutController'
         }).
-        otherwise({
+        when('/404', {
+            templateUrl: 'views/404.html',
+            controller: 'NotFoundController'
+        }).
+        when('/', {
             redirectTo: '/albums'
+        }).
+        otherwise({
+            redirectTo: '/404',
+            controller: 'NotFoundController'
         });
   }]);
+
+app.config(function ($httpProvider) {
+    $httpProvider.interceptors.push('http404Interceptor');
+});
 
 app.constant('config',
 {
     apiRoot: 'http://localhost:55196/api',
     ver: '1.0.0.0',
+});
+
+/* INTERCEPTORS */
+
+app.factory('http404Interceptor', function($q, $window) {
+  return { 
+   'responseError': function(rejection) {
+
+        if (rejection.status == 404)
+        {
+            //console.log(rejection.config);
+
+            $window.location = './#/404';
+        }
+
+        return $q.reject(rejection);
+    }
+  };
 });
 
 /* SERVICES */
@@ -160,6 +190,9 @@ app.controller('AlbumsController',
 
 app.controller('AboutController', ['$scope', 'config', function ($scope, config) {
     $scope.config = config;
+}]);
+
+app.controller('NotFoundController', ['$scope', function ($scope) {
 }]);
 
 

@@ -81,6 +81,7 @@
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="bootstrap\fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="ToDo.txt" />
+    <Content Include="views\404.html" />
     <Content Include="views\about.html" />
     <Content Include="views\albums.html" />
     <Content Include="_references.js" />
