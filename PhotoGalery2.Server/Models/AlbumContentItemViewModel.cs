@@ -14,17 +14,17 @@ namespace PhotoGalery2.Server.Models
         public Uri ThumbUrl { get; set; }
 
         [DataMember]
-        public int? Width { get; set; }
+        public int? OrigWidth { get; set; }
 
         [DataMember]
-        public int? Height { get; set; }
+        public int? OrigHeight { get; set; }
 
         public void FillBy(AlbumContentItem model)
         {
             base.FillBy(model);
 
-            //Width = model.BasicMetadata?.OrigSize.Width;
-            //Height = model.BasicMetadata?.OrigSize.Height;
+            OrigWidth = model.BasicMetadata?.OrigSize.Width;
+            OrigHeight = model.BasicMetadata?.OrigSize.Height;
         }
     }
 }

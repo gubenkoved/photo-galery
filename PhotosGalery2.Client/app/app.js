@@ -82,8 +82,8 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
                 name: apiResponse.ContentItems[i].Name,
                 url: apiResponse.ContentItems[i].Url,
                 thumbUrl: apiResponse.ContentItems[i].ThumbUrl,
-                width: apiResponse.ContentItems[i].Width,
-                height: apiResponse.ContentItems[i].Height,
+                origWidth: apiResponse.ContentItems[i].OrigWidth,
+                origHeight: apiResponse.ContentItems[i].OrigHeight,
             });
         }
 
@@ -257,8 +257,14 @@ app.directive('itemsPane', function() {
 
                 angular.forEach($scope.container.children(), function(item) {
                     //console.log(item);
-                    angular.element(item).css('margin', ($scope.spacing || 2) + 'px');
+                    angular.element(item).css('margin-left', ($scope.spacing || 2) + 'px');
+                    angular.element(item).css('margin-top', ($scope.spacing || 2) + 'px');
                     angular.element(item).css('background', 'green');
+
+                    //angular.element(item).css('height', '200px');
+                    //angular.element(item).css('width', '200px');
+
+                    console.log(item.clientWidth + 'x' + item.clientHeight);
                 });
             }
         }
