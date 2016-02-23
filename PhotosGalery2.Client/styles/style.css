@@ -4,8 +4,10 @@
 
 .contentItem
 {
-	display: inline-block;
-	margin: 5px;
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	border: black 1px solid;
 }
 
 .contentItem .thumbnail

@@ -7,11 +7,15 @@
 
     <h4>albums</h4>
 
-    <album:item ng-repeat="albumItem in currentAlbum.albumItems"
-                item="albumItem" on-click="onAlbumClick(albumItem)"></album:item>
+    <div album-item ng-repeat="albumItem in currentAlbum.albumItems"
+                item="albumItem" on-click="onAlbumClick(albumItem)"></div>
 
     <h4>content items</h4>
 
-    <content:item ng-repeat="contentItem in currentAlbum.contentItems"
-                  item="contentItem"></content:item>
+    <div items-pane target-height="400" spacing="1">
+
+	    <div items-pane-item content-item ng-repeat="contentItem in currentAlbum.contentItems"
+	                  item="contentItem"></div>
+
+	</div>
 </div>

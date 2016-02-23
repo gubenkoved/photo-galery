@@ -1,0 +1,24 @@
+<style type="text/css">
+	.test
+	{
+		width: 100px;
+		height: 100px;
+		background: blue;
+		display: inline-block;
+	}
+</style>
+
+<div ng-init="items = []; items.push(1); items.push(2);">
+	<button ng-click="items.push(items.length + 1)">+</button>
+
+	<div items-pane spacing="3">
+		<div items-pane-item ng-repeat="x in items">
+			{{ x }}
+		</div>
+
+		<div items-pane-item ng-repeat="x in items">
+			2: {{ x }}
+		</div>
+	</div>
+
+</div>
