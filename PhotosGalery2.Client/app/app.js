@@ -175,7 +175,7 @@ app.controller('NotFoundController', ['$scope', function($scope) {}]);
 
 /* DIRECTIVES */
 
-app.directive('contentItem', function() {
+app.directive('contentItem', function($timeout) {
     return {
         scope: {
             item: '='
@@ -186,6 +186,15 @@ app.directive('contentItem', function() {
             return {
                 post: function postLink($scope, $el, $attrs)
                 {
+                    var img = $el.find('img');
+
+                    img.bind('load', function() {
+                        // image is loaded - wait DOM to be rendered - then raise flag
+                        $timeout(function(){
+                            $scope.$emit('content-item-rendered');
+                        });
+                    });
+
                     console.log('[link] content-item');
                 }
               }
@@ -242,45 +251,57 @@ app.directive('itemsPane', function() {
                 $el.css('font-size', '0');
 
                 $scope.container = angular.element($el[0].children[0]);
+                $scope.container2 = $el[0].children[0];
 
-                $scope.$on('last-item-iterated', function ($event)
-                {
+                $scope.$on('items-pane-item-rendered', function ($event) {
                     $scope.rearrangeItems();
                     $event.stopPropagation();
+                    console.log('handled item-rendered');
                 });
             }
         },
 
         controller: function($scope, $timeout) {
             $scope.rearrangeItems = function() {
-                console.log('rearrange for ' + $scope.container.children().length + ' items');
+                var jqContainer = angular.element($scope.container2);
 
-                angular.forEach($scope.container.children(), function(item) {
+                console.log('rearrange for ' + jqContainer.children().length + ' items');
+
+                angular.forEach(jqContainer.children(), function(item) {
                     //console.log(item);
                     angular.element(item).css('margin-left', ($scope.spacing || 2) + 'px');
                     angular.element(item).css('margin-top', ($scope.spacing || 2) + 'px');
                     angular.element(item).css('background', 'green');
 
-                    //angular.element(item).css('height', '200px');
-                    //angular.element(item).css('width', '200px');
+                    var itemAspect = angular.element(item).scope().aspect;
 
-                    console.log(item.clientWidth + 'x' + item.clientHeight);
+                    angular.element(item).css('height', $scope.targetHeight + 'px');
+                    angular.element(item).css('width', itemAspect * $scope.targetHeight + 'px');
+
+                    // console.log(item.clientWidth + 'x' + item.clientHeight
+                    //     + ' aspect: ' + );
                 });
             }
         }
     };
 });
 
-app.directive('itemsPaneItem', function() {
+app.directive('itemsPaneItem', function($timeout) {
     return {
         link: function($scope, $el, $attrs, controller, transcludeFn) {
 
-            $el.css('display', 'inline-block');
+            var jsonStringCfg = $attrs["itemsPaneItem"];
+            var cfg = angular.fromJson(jsonStringCfg);
 
-            if ($scope.$last)
-            {
-                $scope.$emit('last-item-iterated');
-            }
+            $scope.$on(cfg.rendredEvent, function () {
+                    var aspect = $scope.$eval(cfg.aspect);
+
+                    $scope.aspect = aspect;
+                    $scope.$emit('items-pane-item-rendered');
+                }
+            );
+
+            $el.css('display', 'inline-block');
         }
     };
 });

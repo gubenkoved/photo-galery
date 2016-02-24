@@ -12,10 +12,10 @@
 
     <h4>content items</h4>
 
-    <div items-pane target-height="400" spacing="1">
+    <div items-pane target-height="200" spacing="1">
 
-	    <div items-pane-item content-item ng-repeat="contentItem in currentAlbum.contentItems"
-	                  item="contentItem"></div>
-
+	    <div items-pane-item='{"rendredEvent": "content-item-rendered", "aspect": "contentItem.origWidth/contentItem.origHeight"}'
+            content-item ng-repeat="contentItem in currentAlbum.contentItems" item="contentItem">
+        </div>
 	</div>
 </div>
