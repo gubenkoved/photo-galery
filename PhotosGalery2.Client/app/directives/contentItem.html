@@ -1,4 +1,5 @@
 ﻿<div class="contentItem" item-name="{{ item.name }}"
-	orig-width="{{ item.origWidth }}" orig-height="{{ item.origHeight }}">
-    <img ng-src="{{ item.thumbUrl }}" class="thumbnail" />
+	orig-width="{{ item.origWidth }}" orig-height="{{ item.origHeight }}"
+	style="position: relative;">
+    <img spinner-while-loading="/images/spinner.gif" ng-src="{{item.thumbUrl}}" class="thumbnail" />
 </div>

@@ -183,6 +183,8 @@ app.directive('contentItem', function($timeout) {
         templateUrl: '/app/directives/contentItem.html',
         compile: function (element, transclude, maxPriority)
         {
+            element.addClass('contentItem');
+
             return {
                 post: function postLink($scope, $el, $attrs)
                 {
@@ -198,6 +200,46 @@ app.directive('contentItem', function($timeout) {
                     console.log('[link] content-item');
                 }
               }
+        }
+    };
+});
+
+app.directive('spinnerWhileLoading', function() {
+    return {
+        scope: {
+            ngSrc: '@'
+        },
+        link: function ($scope, $el, $attrs)
+        {
+            //debugger;
+
+            var spinnerScr = $attrs['spinnerWhileLoading'];
+
+            //debugger;
+
+             $el.on('load', function() {
+                $el.show();
+
+                $scope.loaderImg.remove();
+                console.log('remove spiner');
+             });
+            
+             $scope.$watch('ngSrc', function() {
+                 //debugger;
+                 console.log('inject spiner');
+
+                 $el.hide();
+
+                 $scope.loaderImg = angular.element('<img></img');
+                 $scope.loaderImg.attr('src', spinnerScr);
+                 $scope.loaderImg.addClass('loader');
+                 $scope.loaderImg.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
+
+                 //debugger;
+
+                 $el.parent().append($scope.loaderImg);
+                 // Set visibility: false + inject temporary spinner overlay
+             });
         }
     };
 });
@@ -233,7 +275,7 @@ app.directive('test', function() {
     };
 });
 
-app.directive('itemsPane', function() {
+app.directive('itemsPane', function($timeout) {
     return {
         transclude: true,
         scope: {
@@ -253,11 +295,37 @@ app.directive('itemsPane', function() {
                 $scope.container = angular.element($el[0].children[0]);
                 $scope.container2 = $el[0].children[0];
 
-                $scope.$on('items-pane-item-rendered', function ($event) {
-                    $scope.rearrangeItems();
-                    $event.stopPropagation();
-                    console.log('handled item-rendered');
+                var jqContainer = angular.element($scope.container2);
+
+                console.log('rearrange for ' + jqContainer.children().length + ' items');
+
+                $scope.$on('items-pane-item-last-iterated', function ()
+                {
+                    angular.forEach(jqContainer.children(), function(item) {
+
+                        var aspect = angular.element(item).scope().aspect;
+
+                        $scope.rearrangeItems();
+                    });
                 });
+
+                // $scope.$on('items-pane-item-rendered', function ($event) {
+
+                //     $scope.rearrangeNeeded = true;
+
+                //     // batch the particular updates
+                //     $timeout(function() {
+
+                //         if ($scope.rearrangeNeeded === true){
+
+                //             $scope.rearrangeItems();
+                //             $event.stopPropagation();
+                //             console.log('handled item-rendered');
+
+                //             $scope.rearrangeNeeded = false;
+                //         }
+                //     }, 1000);
+                // });
             }
         },
 
@@ -271,7 +339,7 @@ app.directive('itemsPane', function() {
                     //console.log(item);
                     angular.element(item).css('margin-left', ($scope.spacing || 2) + 'px');
                     angular.element(item).css('margin-top', ($scope.spacing || 2) + 'px');
-                    angular.element(item).css('background', 'green');
+                    //angular.element(item).css('background', 'green');
 
                     var itemAspect = angular.element(item).scope().aspect;
 
@@ -293,13 +361,19 @@ app.directive('itemsPaneItem', function($timeout) {
             var jsonStringCfg = $attrs["itemsPaneItem"];
             var cfg = angular.fromJson(jsonStringCfg);
 
-            $scope.$on(cfg.rendredEvent, function () {
-                    var aspect = $scope.$eval(cfg.aspect);
+            var aspect = $scope.$eval(cfg.aspect);
+            $scope.aspect = aspect;
 
-                    $scope.aspect = aspect;
+            $scope.$on(cfg.rendredEvent, function () {
+                    console.log('emit item rendered');
                     $scope.$emit('items-pane-item-rendered');
                 }
             );
+
+            if ($scope.$last)
+            {
+                $scope.$emit('items-pane-item-last-iterated');
+            }
 
             $el.css('display', 'inline-block');
         }
