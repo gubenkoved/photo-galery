@@ -35,6 +35,11 @@ app.config(function($httpProvider) {
 app.constant('config', {
     apiRoot: 'http://localhost:59999/api',
     ver: '1.0.0.0',
+
+    desiredThumbSize: {
+        width: 300,
+        height: 300
+    }
 });
 
 /* INTERCEPTORS */
@@ -59,6 +64,17 @@ app.factory('http404Interceptor', function($q, $window) {
 app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $q) {
     var service = {};
 
+    function _updateQueryStringParameter(uri, key, value) {
+      var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+      var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+      if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+      }
+      else {
+        return uri + separator + key + "=" + value;
+      }
+    }
+
     function mapAlbumsResponse(apiResponse) {
         var r = {
             name: apiResponse.Name,
@@ -78,10 +94,16 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         }
 
         for (var i = apiResponse.ContentItems.length - 1; i >= 0; i--) {
+
+            var thumUrl = apiResponse.ContentItems[i].ThumbUrl;
+
+            thumUrl = _updateQueryStringParameter(thumUrl, "w", config.desiredThumbSize.width);
+            thumUrl = _updateQueryStringParameter(thumUrl, "h", config.desiredThumbSize.height);
+
             r.contentItems.push({
                 name: apiResponse.ContentItems[i].Name,
                 url: apiResponse.ContentItems[i].Url,
-                thumbUrl: apiResponse.ContentItems[i].ThumbUrl,
+                thumbUrl: thumUrl,
                 origWidth: apiResponse.ContentItems[i].OrigWidth,
                 origHeight: apiResponse.ContentItems[i].OrigHeight,
             });
@@ -221,12 +243,12 @@ app.directive('spinnerWhileLoading', function() {
                 $el.show();
 
                 $scope.loaderImg.remove();
-                console.log('remove spiner');
+                //console.log('remove spiner');
              });
             
              $scope.$watch('ngSrc', function() {
                  //debugger;
-                 console.log('inject spiner');
+                 //console.log('inject spiner');
 
                  $el.hide();
 
@@ -301,54 +323,129 @@ app.directive('itemsPane', function($timeout) {
 
                 $scope.$on('items-pane-item-last-iterated', function ()
                 {
+                    console.log('handle items-pane-item-last-iterated');
+
                     angular.forEach(jqContainer.children(), function(item) {
 
                         var aspect = angular.element(item).scope().aspect;
+                    });
 
-                        $scope.rearrangeItems();
+                    // thisi speice of shit, but i don't know how to
+                    // correctly postpone items rearrangemene until
+                    // all content items are linked
+                    $timeout(function () {
+                        $timeout(function () {
+                            $scope.rearrangeItems();
+                        });
                     });
                 });
-
-                // $scope.$on('items-pane-item-rendered', function ($event) {
-
-                //     $scope.rearrangeNeeded = true;
-
-                //     // batch the particular updates
-                //     $timeout(function() {
-
-                //         if ($scope.rearrangeNeeded === true){
-
-                //             $scope.rearrangeItems();
-                //             $event.stopPropagation();
-                //             console.log('handled item-rendered');
-
-                //             $scope.rearrangeNeeded = false;
-                //         }
-                //     }, 1000);
-                // });
             }
         },
 
         controller: function($scope, $timeout) {
+
+            function _scaleRow(items, targetWidth)
+            {
+                //debugger;
+
+                targetWidth -= 5;
+
+                var currentWidth = 0;
+
+                angular.forEach(items, function(item) {
+
+                    //console.log('item width: ' + item.clientWidth);
+                    //console.dir(item);
+
+                    currentWidth += item.clientWidth;
+                });
+
+                var scaleFactor = targetWidth / currentWidth;
+
+                //console.log('current row width: ' + currentWidth + '; target: ' + targetWidth + '; scale at: ' + scaleFactor);
+
+                //scaleFactor *= 0.99;
+
+                //return;
+
+                angular.forEach(items, function(item) {
+
+                    //console.dir(item);
+
+                    var itemTargetWidth = item.clientWidth * scaleFactor;
+                    var itemTargetHeight = item.clientHeight * scaleFactor;
+
+                    itemTargetWidth = Math.floor(itemTargetWidth);
+                    itemTargetHeight = Math.floor(itemTargetHeight);
+
+                    angular.element(item).css('width', itemTargetWidth + 'px');
+                    angular.element(item).css('height', itemTargetHeight + 'px');
+                });
+            }
+
             $scope.rearrangeItems = function() {
                 var jqContainer = angular.element($scope.container2);
 
                 console.log('rearrange for ' + jqContainer.children().length + ' items');
 
+                // phase 1: Scale to TargetHeight taking into account the item aspect
+
                 angular.forEach(jqContainer.children(), function(item) {
-                    //console.log(item);
-                    angular.element(item).css('margin-left', ($scope.spacing || 2) + 'px');
-                    angular.element(item).css('margin-top', ($scope.spacing || 2) + 'px');
-                    //angular.element(item).css('background', 'green');
+                    console.log("phase 1");
 
-                    var itemAspect = angular.element(item).scope().aspect;
+                    var jqItem = angular.element(item);
+                    var itemAspect = jqItem.scope().aspect;
 
-                    angular.element(item).css('height', $scope.targetHeight + 'px');
-                    angular.element(item).css('width', itemAspect * $scope.targetHeight + 'px');
+                    jqItem.css('height', $scope.targetHeight + 'px');
+                    jqItem.css('width', itemAspect * $scope.targetHeight + 'px');
 
-                    // console.log(item.clientWidth + 'x' + item.clientHeight
-                    //     + ' aspect: ' + );
+                    // child styling
+
+                    jqItem.children().css('background-color', 'yellow');
+                    jqItem.children().css('position', 'absolute');
+                    angular.element(jqItem.children()[0]).css({
+                        top: $scope.spacing + 'px',
+                        left: $scope.spacing + 'px',
+                        bottom: 0,
+                        right: 0,
+                    });
+
                 });
+
+                // phase 2: Scale rows so that they fills the whole width
+
+                //return;
+
+                var prevOffsetLeft = -1;
+                var row = [];
+
+                var targetRowWidth = $scope.container2.clientWidth;
+
+                angular.forEach(jqContainer.children(), function(item) {
+                    //console.log("phase 2 - " + item.offsetLeft);
+                    //console.dir(item);
+
+                    //console.log(item);
+                    var jqItem = angular.element(item);
+                    var itemScope = jqItem.scope().aspect;
+
+                    if (item.offsetLeft < prevOffsetLeft)
+                    {
+                        _scaleRow(row, targetRowWidth);
+                        row = [];
+                        prevOffsetLeft = -1;
+                    }
+
+                    row.push(item);
+
+                    prevOffsetLeft = item.offsetLeft;
+                });
+
+                // scale last row
+                if (row.length >= 3)
+                {
+                    _scaleRow(row, targetRowWidth);
+                }
             }
         }
     };
@@ -372,10 +469,14 @@ app.directive('itemsPaneItem', function($timeout) {
 
             if ($scope.$last)
             {
-                $scope.$emit('items-pane-item-last-iterated');
+                // wait for this last item to render
+                $timeout(function() {
+                    $scope.$emit('items-pane-item-last-iterated');
+                });
             }
 
             $el.css('display', 'inline-block');
+            $el.css('position', 'relative');
         }
     };
 });
