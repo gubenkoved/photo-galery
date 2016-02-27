@@ -233,23 +233,14 @@ app.directive('spinnerWhileLoading', function() {
         },
         link: function ($scope, $el, $attrs)
         {
-            //debugger;
-
             var spinnerScr = $attrs['spinnerWhileLoading'];
-
-            //debugger;
 
              $el.on('load', function() {
                 $el.show();
-
                 $scope.loaderImg.remove();
-                //console.log('remove spiner');
              });
             
              $scope.$watch('ngSrc', function() {
-                 //debugger;
-                 //console.log('inject spiner');
-
                  $el.hide();
 
                  $scope.loaderImg = angular.element('<img></img');
@@ -257,10 +248,7 @@ app.directive('spinnerWhileLoading', function() {
                  $scope.loaderImg.addClass('loader');
                  $scope.loaderImg.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
 
-                 //debugger;
-
                  $el.parent().append($scope.loaderImg);
-                 // Set visibility: false + inject temporary spinner overlay
              });
         }
     };
@@ -401,7 +389,7 @@ app.directive('itemsPane', function($timeout) {
 
                     // child styling
 
-                    jqItem.children().css('background-color', 'yellow');
+                    //jqItem.children().css('background-color', 'yellow');
                     jqItem.children().css('position', 'absolute');
                     angular.element(jqItem.children()[0]).css({
                         top: $scope.spacing + 'px',
