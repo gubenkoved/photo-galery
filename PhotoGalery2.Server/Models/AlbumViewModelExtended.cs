@@ -59,7 +59,7 @@ namespace PhotoGalery2.Server.Models
                     var contentItemVM = new AlbumContentItemViewModel().FillBy2(albumItem as AlbumContentItem);
 
                     contentItemVM.Url = _pathProvider.GetContentItemUri(albumItem as AlbumContentItem);
-                    contentItemVM.ThumbUrl = _pathProvider.GetContentItemThumbUri(albumItem as AlbumContentItem, new Size(200, 200));
+                    contentItemVM.ThumbUrl = _pathProvider.GetContentItemThumbUri(albumItem as AlbumContentItem);
 
                     ContentItems.Add(contentItemVM);
                 }
@@ -68,6 +68,14 @@ namespace PhotoGalery2.Server.Models
                     var albumVM = new AlbumViewModel().FillBy2(albumItem as Album);
 
                     albumVM.Url = _pathProvider.GetAlbumUri(albumItem as Album);
+
+                    var someAlbumContentItem = (albumItem as Album).Items
+                        .OfType<AlbumContentItem>().FirstOrDefault();
+
+                    if (someAlbumContentItem != null)
+                    {
+                        albumVM.ThumbUrl = _pathProvider.GetContentItemThumbUri(someAlbumContentItem);
+                    }
 
                     AlbumItems.Add(albumVM);
                 }

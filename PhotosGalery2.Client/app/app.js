@@ -83,6 +83,10 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
 
     function _getSpecificSizeThumbUrl(thumbUrl, width, height)
     {
+        // if undefined or 0 was requested - return some super small thumb to easier troubleshooting
+        width = width || 13;
+        height = height || 13;
+
         if (config.avoidClientSideResize)
         {
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
@@ -98,31 +102,37 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         return thumbUrl;
     }
 
-    function mapAlbumsResponse(apiResponse) {
+    function mapAlbumsResponse(apiResult) {
         var r = {
-            name: apiResponse.Name,
-            url: apiResponse.Url,
-            parentUrl: apiResponse.ParentUrl,
-            fullPath: apiResponse.FullPath,
+            name: apiResult.Name,
+            url: apiResult.Url,
+            thumbUrl: apiResult.ThumbUrl,
+            parentUrl: apiResult.ParentUrl,
+            fullPath: apiResult.FullPath,
 
             albumItems: [],
             contentItems: []
         };
 
-        for (var i = apiResponse.AlbumItems.length - 1; i >= 0; i--) {
+        for (var i = apiResult.AlbumItems.length - 1; i >= 0; i--) {
+            var ai = apiResult.AlbumItems[i];
+            
             r.albumItems.push({
-                name: apiResponse.AlbumItems[i].Name,
-                url: apiResponse.AlbumItems[i].Url
+                name: ai.Name,
+                url: ai.Url,
+                thumbUrl: ai.ThumbUrl
             });
         }
 
-        for (var i = apiResponse.ContentItems.length - 1; i >= 0; i--) {
+        for (var i = apiResult.ContentItems.length - 1; i >= 0; i--) {
+            var ci = apiResult.ContentItems[i];
+
             r.contentItems.push({
-                name: apiResponse.ContentItems[i].Name,
-                url: apiResponse.ContentItems[i].Url,
-                thumbUrl: apiResponse.ContentItems[i].ThumbUrl,
-                origWidth: apiResponse.ContentItems[i].OrigWidth,
-                origHeight: apiResponse.ContentItems[i].OrigHeight,
+                name: ci.Name,
+                url: ci.Url,
+                thumbUrl: ci.ThumbUrl,
+                origWidth: ci.OrigWidth,
+                origHeight: ci.OrigHeight
             });
         }
 
@@ -271,28 +281,34 @@ app.directive('contentItem', function($timeout) {
     };
 });
 
-app.directive('spinnerWhileLoading', function() {
+app.directive('spinner2', function() {
     return {
         scope: {
             ngSrc: '@'
         },
         link: function ($scope, $el, $attrs)
         {
-            var spinnerScr = $attrs['spinnerWhileLoading'];
+            $scope.spinner = angular.element('<div class="spinner">\
+  <div class="rect1"></div>\
+  <div class="rect2"></div>\
+  <div class="rect3"></div>\
+  <div class="rect4"></div>\
+  <div class="rect5"></div>\
+</div>');
+            $scope.spinner.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
 
              $el.on('load', function() {
                 $el.show();
-                $scope.loaderImg.remove();
+                $scope.spinner.remove();
              });
             
              $scope.$watch('ngSrc', function() {
                  $el.hide();
 
-                 $scope.loaderImg = angular.element('<img class="loader"></img>');
-                 $scope.loaderImg.attr('src', spinnerScr);
-                 $scope.loaderImg.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
+                 //$scope.loaderImg = angular.element('<img class="loader"></img>');
+                 //$scope.loaderImg.attr('src', spinnerScr);                 
 
-                 $el.parent().append($scope.loaderImg);
+                 $el.parent().append($scope.spinner);
              });
         }
     };

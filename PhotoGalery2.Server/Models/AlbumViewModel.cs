@@ -11,6 +11,9 @@ namespace PhotoGalery2.Server.Models
     public class AlbumViewModel : AlbumItemViewModel,
          IViewModelFilledInByModel<Album>
     {
+        [DataMember]
+        public Uri ThumbUrl { get; set; }
+
         public virtual void FillBy(Album model)
         {
             base.FillBy(model);

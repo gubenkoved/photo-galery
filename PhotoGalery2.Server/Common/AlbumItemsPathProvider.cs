@@ -46,7 +46,7 @@ namespace PhotoGalery2.Server
             return contentItemUriBuilder.Uri;
         }
 
-        public Uri GetContentItemThumbUri(AlbumContentItem contentItem, Size thumbSize)
+        public Uri GetContentItemThumbUri(AlbumContentItem contentItem)
         {
             var rootUri = GetApiRootUri();
 
@@ -58,7 +58,7 @@ namespace PhotoGalery2.Server
 
             contentItemUriBuilder.Path += $"albums/{albumPath}/content/{contentItemPathSegment}/thumbnail";
 
-            contentItemUriBuilder.Query = $"w={thumbSize.Width}&h={thumbSize.Height}";
+            //contentItemUriBuilder.Query = $"w={thumbSize.Width}&h={thumbSize.Height}";
 
             return contentItemUriBuilder.Uri;
         }
