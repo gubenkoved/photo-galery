@@ -27,7 +27,13 @@ div[album-item]
 
 .album-item-content
 {
+	font-size: 14px;
 	cursor: pointer;
+}
+
+.album-item-content img
+{
+	object-fit: cover;
 }
 
 div[album-item] a

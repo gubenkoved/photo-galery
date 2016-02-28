@@ -81,26 +81,7 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
       }
     }
 
-    function _getSpecificSizeThumbUrl(thumbUrl, width, height)
-    {
-        // if undefined or 0 was requested - return some super small thumb to easier troubleshooting
-        width = width || 13;
-        height = height || 13;
-
-        if (config.avoidClientSideResize)
-        {
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
-
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
-        } else
-        {
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', config.desiredThumbSize.width);
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', config.desiredThumbSize.height);            
-        }
-
-        return thumbUrl;
-    }
+    
 
     function mapAlbumsResponse(apiResult) {
         var r = {
@@ -139,7 +120,29 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         return r;
     }
 
-    service.getSpecificSizeThumbUrl = _getSpecificSizeThumbUrl;
+    service.getSpecificSizeThumbUrl = function (thumbUrl, width, height, keepSourceAspectRatio)
+    {
+        // if undefined or 0 was requested - return some super small thumb to easier troubleshooting
+        width = width || 13;
+        height = height || 13;
+
+        if (config.avoidClientSideResize)
+        {
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
+
+            if (keepSourceAspectRatio !== true)
+            {
+                thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
+            }
+        } else
+        {
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', config.desiredThumbSize.width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', config.desiredThumbSize.height);            
+        }
+
+        return thumbUrl;
+    }
 
     service.getAlbumItems = function(albumUrl) {
         if (!albumUrl) {
@@ -203,10 +206,6 @@ app.controller('AlbumsController', ['$scope', '$routeParams', '$route', 'AlbumsS
             });
         }
 
-        $scope.getSpecificSizeThumbUrl = function (thumbUrl, width, height) {
-            return AlbumsService.getSpecificSizeThumbUrl(thumbUrl, width, height);
-        }
-
         $scope.getParentAlbum = function() {
             $scope.getAlbum($scope.currentAlbum.parentUrl);
         }
@@ -251,36 +250,6 @@ app.controller('TestController', ['$scope', function($scope){
 
 /* DIRECTIVES */
 
-app.directive('contentItem', function($timeout) {
-    return {
-        scope: {
-            item: '='
-        },
-        templateUrl: '/app/directives/contentItem.html',
-        //require: '^ablumView'
-        compile: function (element, transclude, maxPriority)
-        {
-            element.addClass('contentItem');
-
-            return function($scope, $el, $attrs)
-            {
-                var img = $el.find('img');
-
-                $scope.$on('rerender-thumbnails', function (event, args) {
-                    //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
-                    if (!$scope.$$destroyed)
-                    {
-                        var url = args.thumbUrlResolver($scope.item.thumbUrl, img.width(), img.height());
-                        img.attr('src', url);
-                    }
-                });
-
-                console.log('[post-link] content-item');
-            }
-        }
-    };
-});
-
 app.directive('spinner2', function() {
     return {
         scope: {
@@ -314,13 +283,57 @@ app.directive('spinner2', function() {
     };
 });
 
-app.directive('albumItem', function() {
+app.directive('contentItem', function(AlbumsService) {
+    return {
+        scope: {
+            item: '='
+        },
+        templateUrl: '/app/directives/contentItem.html',
+        //require: '^ablumView'
+        link: function($scope, $el, $attrs) {
+            var img = $el.find('img');
+
+            $scope.$on('rerender-thumbnails', function (event, args) {
+                //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
+                if (!$scope.$$destroyed)
+                {
+                    //debugger;
+                    var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, img.width(), img.height());
+                    img.attr('src', url);
+                }
+            });
+
+            console.log('[post-link] content-item');
+        }
+    };
+});
+
+app.directive('albumItem', function(AlbumsService) {
     return {
         scope: {
             item: '=',
             onClick: '&'
         },
-        templateUrl: '/app/directives/albumItem.html'
+        templateUrl: '/app/directives/albumItem.html',
+        link: function($scope, $el, $attrs) {
+            var img = $el.find('img');
+
+            $scope.$on('rerender-thumbnails', function (event, args) {
+                //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
+                if (!$scope.$$destroyed)
+                {
+                    if ($scope.item.thumbUrl)
+                    {
+                        var s = Math.max(img.width(), img.height())
+
+                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, s, s, true);
+                        img.attr('src', url);
+                    }
+                }
+            });
+
+            console.log('[post-link] album-item');
+        }
     };
 });
 
@@ -330,8 +343,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             album: '=',
             spacing: '@',
             targetHeight: '@',
-            onAlbumClick: '&',
-            specificSizeThumbResolver: '&'
+            onAlbumClick: '&'
         },
         restrict: 'A',
         templateUrl: '/app/directives/albumView.html',
@@ -456,12 +468,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
 
                     $timeout(function() {
                         console.log('broadcasting rerender-thumbnails');
-                        $scope.$broadcast('rerender-thumbnails', {
-                            thumbUrlResolver: function (thumbUrl, desiredWidth, desiredHeight)
-                            {
-                                return $scope.specificSizeThumbResolver()(thumbUrl, desiredWidth, desiredHeight);
-                            }
-                        });
+                        $scope.$broadcast('rerender-thumbnails');
                     });
                 });
             }

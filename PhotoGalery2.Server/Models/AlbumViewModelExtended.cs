@@ -69,8 +69,7 @@ namespace PhotoGalery2.Server.Models
 
                     albumVM.Url = _pathProvider.GetAlbumUri(albumItem as Album);
 
-                    var someAlbumContentItem = (albumItem as Album).Items
-                        .OfType<AlbumContentItem>().FirstOrDefault();
+                    var someAlbumContentItem = TryFindSomeContentItem(albumItem as Album);
 
                     if (someAlbumContentItem != null)
                     {
@@ -80,6 +79,23 @@ namespace PhotoGalery2.Server.Models
                     AlbumItems.Add(albumVM);
                 }
             }
+        }
+
+        private static AlbumContentItem TryFindSomeContentItem(Album album)
+        {
+            var contentItem = album.Items.OfType<AlbumContentItem>().FirstOrDefault();
+
+            if (contentItem != null)
+            {
+                return contentItem;
+            }
+
+            foreach (var nestAlbum in album.Items.OfType<Album>())
+            {
+                return TryFindSomeContentItem(nestAlbum);
+            }
+
+            return null;
         }
     }
 }
