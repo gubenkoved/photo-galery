@@ -180,6 +180,8 @@ app.controller('AlbumsController', ['$scope', '$routeParams', '$route', 'AlbumsS
         }
 
         $scope.onAlbumClick = function(album) {
+            console.log('handle onAlbumClick for');
+            console.log(album);
             $scope.getAlbum(album.url);
         }
 
@@ -278,7 +280,7 @@ app.directive('albumItem', function() {
     return {
         scope: {
             item: '=',
-            click: '&onClick'
+            onClick: '&'
         },
         templateUrl: '/app/directives/albumItem.html'
     };
@@ -287,7 +289,8 @@ app.directive('albumItem', function() {
 app.directive('albumView', function ($compile, $timeout, $window) {
     return {
         scope: {
-            album: '='
+            album: '=',
+            onAlbumClick: '&'
         },
         restrict: 'A',
         templateUrl: '/app/directives/albumView.html',
@@ -399,6 +402,8 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             }
         },
         link: function ($scope, $el, $attr, $controller, $transclude) {
+            $scope.albumItemsContainer = $el.find('.albumItemsRoot');
+
             $scope.contentItemsContainer = $el.find('.contentItemsRoot');
             $scope.contentItemsContainer.css({
                 'font-size': 0
@@ -408,6 +413,24 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             {
                 if (newValue)
                 {
+                    angular.forEach($scope.album.albumItems, function (albumItemModel)
+                    {
+                        var albumItemScope = $scope.$new();
+                        albumItemScope.albumItem = albumItemModel;
+                        albumItemScope.onAlbumClick2 = function(a)
+                        {
+                            console.log(a);
+                            console.log($scope.onAlbumClick);
+                            $scope.onAlbumClick()(a);
+                        };
+
+                        var albumItemDirective = angular.element('<div album-item item="albumItem" on-click="onAlbumClick()(albumItem)"></div>');
+
+                        $scope.albumItemsContainer.append(albumItemDirective);
+
+                        $compile(albumItemDirective)(albumItemScope);
+                    });
+
                     angular.forEach($scope.album.contentItems, function (contentItemModel)
                     {
                         var contentItemScope = $scope.$new();
@@ -470,190 +493,6 @@ app.directive('test', function() {
                     console.log('[test link]');
                 }
               }
-        }
-    };
-});
-
-app.directive('itemsPane', function($timeout) {
-    return {
-        transclude: true,
-        scope: {
-            targetHeight: '@',
-            spacing: '@'
-        },
-
-        templateUrl: '/app/directives/itemsPane.html',
-
-        link: {
-            post: function($scope, $el, $attrs, controller, transcludeFn) {
-                
-                console.log('[link] itemsPane');
-
-                $el.css('font-size', '0');
-
-                $scope.container = angular.element($el[0].children[0]);
-                $scope.container2 = $el[0].children[0];
-
-                var jqContainer = angular.element($scope.container2);
-
-                console.log('rearrange for ' + jqContainer.children().length + ' items');
-
-                $scope.$on('items-pane-item-last-iterated', function ()
-                {
-                    console.log('handle items-pane-item-last-iterated');
-
-                    angular.forEach(jqContainer.children(), function(item) {
-
-                        var aspect = angular.element(item).scope().aspect;
-                    });
-
-                    // thisi speice of shit, but i don't know how to
-                    // correctly postpone items rearrangemene until
-                    // all content items are linked
-                    $timeout(function () {
-                        $timeout(function () {
-                            $scope.rearrangeItems();
-                        });
-                    });
-                });
-            }
-        },
-
-        controller: function($scope, $timeout) {
-
-            function _scaleRow(items, targetWidth)
-            {
-                //debugger;
-
-                targetWidth -= 5;
-
-                var currentWidth = 0;
-
-                angular.forEach(items, function(item) {
-
-                    //console.log('item width: ' + item.clientWidth);
-                    //console.dir(item);
-
-                    currentWidth += item.clientWidth;
-                });
-
-                var scaleFactor = targetWidth / currentWidth;
-
-                //console.log('current row width: ' + currentWidth + '; target: ' + targetWidth + '; scale at: ' + scaleFactor);
-
-                //scaleFactor *= 0.99;
-
-                //return;
-
-                angular.forEach(items, function(item) {
-
-                    //console.dir(item);
-
-                    var itemTargetWidth = item.clientWidth * scaleFactor;
-                    var itemTargetHeight = item.clientHeight * scaleFactor;
-
-                    itemTargetWidth = Math.floor(itemTargetWidth);
-                    itemTargetHeight = Math.floor(itemTargetHeight);
-
-                    angular.element(item).css('width', itemTargetWidth + 'px');
-                    angular.element(item).css('height', itemTargetHeight + 'px');
-                });
-            }
-
-            $scope.rearrangeItems = function() {
-                var jqContainer = angular.element($scope.container2);
-
-                console.log('rearrange for ' + jqContainer.children().length + ' items');
-
-                // phase 1: Scale to TargetHeight taking into account the item aspect
-
-                angular.forEach(jqContainer.children(), function(item) {
-                    console.log("phase 1");
-
-                    var jqItem = angular.element(item);
-                    var itemAspect = jqItem.scope().aspect;
-
-                    jqItem.css('height', $scope.targetHeight + 'px');
-                    jqItem.css('width', itemAspect * $scope.targetHeight + 'px');
-
-                    // child styling
-
-                    //jqItem.children().css('background-color', 'yellow');
-                    jqItem.children().css('position', 'absolute');
-                    angular.element(jqItem.children()[0]).css({
-                        top: $scope.spacing + 'px',
-                        left: $scope.spacing + 'px',
-                        bottom: 0,
-                        right: 0,
-                    });
-
-                });
-
-                // phase 2: Scale rows so that they fills the whole width
-
-                //return;
-
-                var prevOffsetLeft = -1;
-                var row = [];
-
-                var targetRowWidth = $scope.container2.clientWidth;
-
-                angular.forEach(jqContainer.children(), function(item) {
-                    //console.log("phase 2 - " + item.offsetLeft);
-                    //console.dir(item);
-
-                    //console.log(item);
-                    var jqItem = angular.element(item);
-                    var itemScope = jqItem.scope().aspect;
-
-                    if (item.offsetLeft < prevOffsetLeft)
-                    {
-                        _scaleRow(row, targetRowWidth);
-                        row = [];
-                        prevOffsetLeft = -1;
-                    }
-
-                    row.push(item);
-
-                    prevOffsetLeft = item.offsetLeft;
-                });
-
-                // scale last row
-                if (row.length >= 3)
-                {
-                    _scaleRow(row, targetRowWidth);
-                }
-            }
-        }
-    };
-});
-
-app.directive('itemsPaneItem', function($timeout) {
-    return {
-        link: function($scope, $el, $attrs, controller, transcludeFn) {
-
-            var jsonStringCfg = $attrs["itemsPaneItem"];
-            var cfg = angular.fromJson(jsonStringCfg);
-
-            var aspect = $scope.$eval(cfg.aspect);
-            $scope.aspect = aspect;
-
-            $scope.$on(cfg.rendredEvent, function () {
-                    console.log('emit item rendered');
-                    $scope.$emit('items-pane-item-rendered');
-                }
-            );
-
-            if ($scope.$last)
-            {
-                // wait for this last item to render
-                $timeout(function() {
-                    $scope.$emit('items-pane-item-last-iterated');
-                });
-            }
-
-            $el.css('display', 'inline-block');
-            $el.css('position', 'relative');
         }
     };
 });
