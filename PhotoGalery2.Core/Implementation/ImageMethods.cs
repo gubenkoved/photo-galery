@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,6 +35,22 @@ namespace PhotoGalery2.Core.Implementation
             }
         }
 
+        public static BasicMetadata GetBasicMetadata(string path)
+        {
+            _log.Debug(x => x("populating basic metadata for '{0}'", path));
+
+            BasicMetadata result;
+
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                result = GetBasicMetadata(stream);
+            }
+            
+            _log.Debug(x => x("populated basic metadata for '{0}'", path));
+
+            return result;
+        }
+
         private static Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
         {
             var resizedImageStream = new MemoryStream();
@@ -46,24 +64,9 @@ namespace PhotoGalery2.Core.Implementation
                     CalcTargetSize(rawImage.Width, rawImage.Height, maxSize,
                         out targetWidth, out targetHeight);
 
-                    using (Bitmap image = new Bitmap(targetWidth, targetHeight))
-                    {
-                        using (Graphics gr = Graphics.FromImage(image))
-                        {
-                            //gr.SmoothingMode = SmoothingMode.HighQuality;
-                            //gr.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                            //gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                            gr.DrawImage(rawImage, new Rectangle(0, 0, targetWidth, targetHeight));
-                        }
+                    resultSize = new Size(targetWidth, targetHeight);
 
-                        image.Save(resizedImageStream, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                        resizedImageStream.Position = 0;
-
-                        resultSize = new Size(targetWidth, targetHeight);
-
-                        return resizedImageStream;
-                    }
+                    return GenerateThumbinailExact(origImageStream, resultSize);
                 }
                 else // image already with allowed size
                 {
@@ -79,7 +82,7 @@ namespace PhotoGalery2.Core.Implementation
             }
         }
 
-        private static Stream GenerateThumbinailExact(Stream origImageStream, Size exactSize)
+        private static Stream GenerateThumbinailExact(Stream origImageStream, Size exactSize, int jpegQualityLevel = 100)
         {
             var resizedImageStream = new MemoryStream();
             using (Image rawImage = Image.FromStream(origImageStream))
@@ -94,26 +97,18 @@ namespace PhotoGalery2.Core.Implementation
                         gr.DrawImage(rawImage, new Rectangle(0, 0, exactSize.Width, exactSize.Height));
                     }
 
-                    image.Save(resizedImageStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    var encoder = GetEncoder(ImageFormat.Jpeg);
+                    
+                    var encParameter = new EncoderParameters(1);
+                    encParameter.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, jpegQualityLevel);
+
+                    image.Save(resizedImageStream, encoder, encParameter);
 
                     resizedImageStream.Position = 0;
 
                     return resizedImageStream;
                 }
             }
-        }
-
-
-        public static BasicMetadata GetBasicMetadata(string path)
-        {
-            _log.Debug(x => x("populating basic metadata for '{0}'", path));
-
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return GetBasicMetadata(stream);
-            }
-
-            _log.Debug(x => x("populated basic metadata for '{0}'", path));
         }
 
         private static BasicMetadata GetBasicMetadata(Stream imageStream)
@@ -143,6 +138,20 @@ namespace PhotoGalery2.Core.Implementation
                 newHeight = maxSize.Height;
                 newWidth = (int)(maxSize.Height * aspect);
             }
+        }
+
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
         }
     }
 }
