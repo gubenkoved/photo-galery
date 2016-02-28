@@ -1,9 +1,15 @@
 <div>
 	<h1>{{ album.name }}</h1>
-	<h2>Nested albums</h2>
-	<div class="albumItemsRoot">
+
+	<div ng-hide="!album.albumItems.length">
+		<h2>Nested albums</h2>
+		<div class="albumItemsRoot">
+		</div>
 	</div>
-	<h2>Content</h2>
-	<div class="contentItemsRoot">
+
+	<div ng-hide="!album.contentItems.length">
+		<h2>Content</h2>
+		<div class="contentItemsRoot">
+		</div>
 	</div>
 </div>

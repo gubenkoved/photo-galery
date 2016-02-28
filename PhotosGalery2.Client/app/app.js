@@ -265,9 +265,8 @@ app.directive('spinnerWhileLoading', function() {
              $scope.$watch('ngSrc', function() {
                  $el.hide();
 
-                 $scope.loaderImg = angular.element('<img></img');
+                 $scope.loaderImg = angular.element('<img class="loader"></img>');
                  $scope.loaderImg.attr('src', spinnerScr);
-                 $scope.loaderImg.addClass('loader');
                  $scope.loaderImg.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
 
                  $el.parent().append($scope.loaderImg);
