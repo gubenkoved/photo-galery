@@ -300,6 +300,8 @@ app.directive('albumView', function ($compile, $timeout, $window) {
     return {
         scope: {
             album: '=',
+            spacing: '@',
+            targetHeight: '@',
             onAlbumClick: '&',
             specificSizeThumbResolver: '&'
         },
@@ -308,8 +310,8 @@ app.directive('albumView', function ($compile, $timeout, $window) {
         controller: function ($scope)
         {
             $scope.contentItemWrappers = []
-            $scope.targetHeight = 200;
-            $scope.spacing = 3;
+            $scope.targetHeight = $scope.targetHeight || 200;
+            $scope.spacing = $scope.spacing || 3;
 
             function _scaleRow(contentItemWrappersRow, targetWidth) {
                 console.log('scaling row');
