@@ -23,15 +23,12 @@
 {
 	cursor: pointer;
 	border-bottom: dotted 1px black;
+
+	/*background-color: red;*/
+	display: inline-block;
 }
 
 .albumItem a:hover
 {
 	border-bottom: solid 1px black;
-}
-
-
-[items-pane]
-{
-	/*background-color: #DDD;*/
 }
