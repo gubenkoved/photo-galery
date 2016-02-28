@@ -40,7 +40,12 @@ app.constant('config', {
     desiredThumbSize: {
         width: 300,
         height: 300
-    }
+    },
+
+    // this improves image quality by requesting exact size from server
+    // that is needed to show in browser w/o any conversion
+    // loading on API side is increased however by enablig this
+    avoidClientSideResize: true
 });
 
 /* INTERCEPTORS */
@@ -78,10 +83,17 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
 
     function _getSpecificSizeThumbUrl(thumbUrl, width, height)
     {
-        thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
-        thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
+        if (config.avoidClientSideResize)
+        {
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
 
-        thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
+        } else
+        {
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', config.desiredThumbSize.width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', config.desiredThumbSize.height);            
+        }
 
         return thumbUrl;
     }
