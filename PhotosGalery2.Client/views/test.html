@@ -1,16 +1,87 @@
 <style type="text/css">
-	.test
+	.root
 	{
+
+	}
+
+	.item-wrap
+	{
+		display: inline-flex;
+
 		width: 100px;
 		height: 100px;
-		background: blue;
-		display: inline-block;
+
+		background-color: red;
+	}
+
+	.item
+	{
+		background-color: blue;
+
+		width: 100%;
+		height: 100%;
 	}
 </style>
 
-<!-- <div ng-controller="TestController as test"> -->
-<div ng-controller="AlbumsController as albums"
-	ng-init="init()">
-	<div album-view album="currentAlbum" on-album-click="onAlbumClick">
+<div class="root">
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
+	</div>
+
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
+	</div>
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
+	</div>
+	<div class="item-wrap">
+		<div class="item">
+			<a>test long test long test long test long test long test long test long test long test long </a>
+		</div>
+	</div>
+
+	<div class="item-wrap">
+		<div class="item">
+			<a>test long test long test long test long test long test long test long test long test long </a>
+		</div>
+	</div>
+
+	<div class="item-wrap">
+		<div class="item">
+			<a>test long test long test long test long test long test long test long test long test long </a>
+		</div>
+	</div>
+
+	<div class="item-wrap">
+		<div class="item">
+			<a>test long test long test long test long test long test long test long test long test long </a>
+		</div>
+	</div>
+
+	<div class="item-wrap">
+		<div class="item">
+			<a>test long test long test long test long test long test long test long test long test long </a>
+		</div>
+	</div>
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
+	</div>
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
+	</div>
+	<div class="item-wrap">
+		<div class="item">
+			<a>test</a>
+		</div>
 	</div>
 </div>

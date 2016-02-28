@@ -452,9 +452,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             }
         },
         link: function ($scope, $el, $attr, $controller, $transclude) {
-            $scope.albumItemsContainer = $el.find('.albumItemsRoot');
+            $scope.albumItemsContainer = $el.find('.album-items-root');
 
-            $scope.contentItemsContainer = $el.find('.contentItemsRoot');
+            $scope.contentItemsContainer = $el.find('.content-items-root');
             $scope.contentItemsContainer.css({
                 'font-size': 0
             });
@@ -467,12 +467,6 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     {
                         var albumItemScope = $scope.$new();
                         albumItemScope.albumItem = albumItemModel;
-                        albumItemScope.onAlbumClick2 = function(a)
-                        {
-                            console.log(a);
-                            console.log($scope.onAlbumClick);
-                            $scope.onAlbumClick()(a);
-                        };
 
                         var albumItemDirective = angular.element('<div album-item item="albumItem" on-click="onAlbumClick()(albumItem)"></div>');
 
@@ -492,6 +486,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                             margin: 0,
                             padding: 0
                         });
+                        contentItemWrapper.addClass('content-item-wrapper');
 
                         var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
                         

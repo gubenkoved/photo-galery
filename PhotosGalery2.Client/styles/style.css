@@ -2,7 +2,7 @@
 {
 }
 
-.contentItem
+div[content-item]
 {
 	margin: 0px;
 	padding: 0px;
@@ -10,7 +10,7 @@
 	background-color: #EEE;
 }
 
-.contentItem .thumbnail
+div[content-item] .thumbnail
 {
 	margin: 0px;
 	padding: 0px;
@@ -19,16 +19,22 @@
 	display: block;
 }
 
-.albumItem a
+[album-item]
 {
-	cursor: pointer;
-	border-bottom: dotted 1px black;
+	margin: 1px;
+	display: inline-flex;
 
-	/*background-color: red;*/
-	display: inline-block;
+	width: 160px;
+	height: 120px;
+
+	text-align: center;
+
+	background-color: green;
 }
 
-.albumItem a:hover
+.album-item-content
 {
-	border-bottom: solid 1px black;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
 }
