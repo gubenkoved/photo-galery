@@ -1,4 +1,9 @@
-﻿body
+html
+{
+	overflow-y: scroll;
+}
+
+body
 {
 }
 
@@ -22,4 +27,16 @@ div[album-item]
 .album-item-content
 {
 	cursor: pointer;
+}
+
+div[album-item] a
+{
+	font-family: 'Segoe UI';
+	background-color: rgba(255,255,255,0.4);
+	width: 100%;
+	display: block;
+	padding: 10px;
+	bottom: 0px;
+	position: absolute;
+	box-sizing: border-box;
 }
