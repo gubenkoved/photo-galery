@@ -465,12 +465,32 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 }
             });
 
-            angular.element($window).bind('resize', function () {
-                console.log('viewport changed!');
-                $scope.rearrange();
-            });
-            
             // listen for container size changes
+            $scope.$watch(function() {
+                return $scope.contentItemsContainer.width();
+            }, function (newValue, oldValue) {
+                if (newValue !== oldValue)
+                {
+                    //console.log('viewport width changed from ' + oldValue + ' to ' + newValue);
+
+                    $scope.rearrangeNeeded = true;
+
+                    $timeout(function(){
+
+                        if ($scope.rearrangeNeeded)
+                        {
+                            $scope.rearrange();
+                            $scope.rearrangeNeeded = false;
+                        }
+
+                    }, 1000);
+                }
+            });
+
+            angular.element($window).bind('resize', function () {
+                //console.log('widnows resized - start digest cycle');
+                $scope.$apply();
+            });
         }
     };
 })
