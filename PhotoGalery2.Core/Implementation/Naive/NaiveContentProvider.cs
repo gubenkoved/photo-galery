@@ -15,6 +15,12 @@ namespace PhotoGalery2.Core.Implementation.Naive
         /// Uses temp path as the default.
         /// </summary>
         public string ThumbCacheDir { get; set; }
+        
+        /// <summary>
+        /// Gets or sets flag that controls usage of Cache for Thumbnails.
+        /// Default value is true;
+        /// </summary>
+        public bool UseCache { get; set; } = true;
 
         public NaiveContentProvider()
         {
@@ -33,12 +39,12 @@ namespace PhotoGalery2.Core.Implementation.Naive
                 mimeType: MimeMapping.GetMimeMapping(path));
         }
 
-        public override AlbumItemContentResult GetThumbnail(Album album, string contentItemId, Size thumbSize)
+        public override AlbumItemContentResult GetThumbnail(Album album, string contentItemId, Size thumbSize, bool enforceAspectRato)
         {
             // try cached
-            string thumbPath = GetCachedThumbPathFor(album, contentItemId, thumbSize);
+            string thumbPath = GetCachedThumbPathFor(album, contentItemId, thumbSize, enforceAspectRato);
 
-            if (File.Exists(thumbPath))
+            if (File.Exists(thumbPath) && UseCache)
             {
                 // return from cache
                 return new AlbumItemContentResult(
@@ -50,7 +56,16 @@ namespace PhotoGalery2.Core.Implementation.Naive
             string path = GetFilePathFor(album, contentItemId);
 
             Size resultSize;
-            Stream thumbStream = ImageMethods.GenerateThumbinail(path, thumbSize, out resultSize);
+            Stream thumbStream;
+
+            if (enforceAspectRato)
+            {
+                thumbStream = ImageMethods.GenerateThumbinail(path, thumbSize, out resultSize);
+            } else
+            {
+                thumbStream = ImageMethods.GenerateThumbinailExact(path, thumbSize);
+                resultSize = thumbSize;
+            }
 
             // save in cache
             if (!Directory.Exists(ThumbCacheDir))
@@ -72,14 +87,15 @@ namespace PhotoGalery2.Core.Implementation.Naive
                 mimeType: MimeMapping.GetMimeMapping(path));
         }
 
-        private string GetCachedThumbPathFor(Album album, string contentItemId, Size thumbSize)
+        #region Private methods
+        private string GetCachedThumbPathFor(Album album, string contentItemId, Size thumbSize, bool enforceAspectRato)
         {
             string fullAlbumPath = string.Join("_",
                 GetAlbumsToRoot(album)
                     .OfType<NaiveAlbum>()
                     .Select(na => new DirectoryInfo(na.PhysicalDir).Name));
 
-            string thumbPath = fullAlbumPath + $"_{contentItemId}_{thumbSize.Width}x{thumbSize.Height}.jpg";
+            string thumbPath = fullAlbumPath + $"_{contentItemId}_{thumbSize.Width}x{thumbSize.Height}{(enforceAspectRato ? "" : "_exact")}.jpg";
 
             return Path.Combine(ThumbCacheDir, thumbPath);
         }
@@ -101,7 +117,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
 
             return result;
         }
-            
+
         private FileStream GetFileStreamFor(string path)
         {
             var fileStream = new System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -119,6 +135,7 @@ namespace PhotoGalery2.Core.Implementation.Naive
             var nAlbum = album as NaiveAlbum;
 
             return System.IO.Path.Combine(nAlbum.PhysicalDir, contentItemId);
-        }
+        } 
+        #endregion
     }
 }

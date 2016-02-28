@@ -76,6 +76,16 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
       }
     }
 
+    function _getSpecificSizeThumbUrl(thumbUrl, width, height)
+    {
+        thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
+        thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
+
+        thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
+
+        return thumbUrl;
+    }
+
     function mapAlbumsResponse(apiResponse) {
         var r = {
             name: apiResponse.Name,
@@ -95,16 +105,10 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         }
 
         for (var i = apiResponse.ContentItems.length - 1; i >= 0; i--) {
-
-            var thumUrl = apiResponse.ContentItems[i].ThumbUrl;
-
-            thumUrl = _updateQueryStringParameter(thumUrl, "w", config.desiredThumbSize.width);
-            thumUrl = _updateQueryStringParameter(thumUrl, "h", config.desiredThumbSize.height);
-
             r.contentItems.push({
                 name: apiResponse.ContentItems[i].Name,
                 url: apiResponse.ContentItems[i].Url,
-                thumbUrl: thumUrl,
+                thumbUrl: apiResponse.ContentItems[i].ThumbUrl,
                 origWidth: apiResponse.ContentItems[i].OrigWidth,
                 origHeight: apiResponse.ContentItems[i].OrigHeight,
             });
@@ -112,6 +116,8 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
 
         return r;
     }
+
+    service.getSpecificSizeThumbUrl = _getSpecificSizeThumbUrl;
 
     service.getAlbumItems = function(albumUrl) {
         if (!albumUrl) {
@@ -175,6 +181,10 @@ app.controller('AlbumsController', ['$scope', '$routeParams', '$route', 'AlbumsS
             });
         }
 
+        $scope.getSpecificSizeThumbUrl = function (thumbUrl, width, height) {
+            return AlbumsService.getSpecificSizeThumbUrl(thumbUrl, width, height);
+        }
+
         $scope.getParentAlbum = function() {
             $scope.getAlbum($scope.currentAlbum.parentUrl);
         }
@@ -225,25 +235,26 @@ app.directive('contentItem', function($timeout) {
             item: '='
         },
         templateUrl: '/app/directives/contentItem.html',
+        //require: '^ablumView'
         compile: function (element, transclude, maxPriority)
         {
             element.addClass('contentItem');
 
-            return {
-                post: function postLink($scope, $el, $attrs)
-                {
-                    var img = $el.find('img');
+            return function($scope, $el, $attrs)
+            {
+                var img = $el.find('img');
 
-                    img.bind('load', function() {
-                        // image is loaded - wait DOM to be rendered - then raise flag
-                        $timeout(function(){
-                            $scope.$emit('content-item-rendered');
-                        });
-                    });
+                $scope.$on('rerender-thumbnails', function (event, args) {
+                    //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
+                    if (!$scope.$$destroyed)
+                    {
+                        var url = args.thumbUrlResolver($scope.item.thumbUrl, img.width(), img.height());
+                        img.attr('src', url);
+                    }
+                });
 
-                    console.log('[link] content-item');
-                }
-              }
+                console.log('[post-link] content-item');
+            }
         }
     };
 });
@@ -289,7 +300,8 @@ app.directive('albumView', function ($compile, $timeout, $window) {
     return {
         scope: {
             album: '=',
-            onAlbumClick: '&'
+            onAlbumClick: '&',
+            specificSizeThumbResolver: '&'
         },
         restrict: 'A',
         templateUrl: '/app/directives/albumView.html',
@@ -299,8 +311,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             $scope.targetHeight = 200;
             $scope.spacing = 3;
 
-            function _scaleRow(contentItemWrappersRow, targetWidth)
-            {
+            function _scaleRow(contentItemWrappersRow, targetWidth) {
                 console.log('scaling row');
 
                 targetWidth -= 5;
@@ -314,22 +325,25 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 var scaleFactor = targetWidth / currentWidth;
 
                 angular.forEach(contentItemWrappersRow, function(contentItemWrapper) {
+
                     var itemTargetWidth = contentItemWrapper.width() * scaleFactor;
                     var itemTargetHeight = contentItemWrapper.height() * scaleFactor;
 
-                    //itemTargetWidth = Math.floor(itemTargetWidth);
-                    //itemTargetHeight = Math.floor(itemTargetHeight);
+                    itemTargetWidth = Math.round(itemTargetWidth);
+                    itemTargetHeight = Math.round(itemTargetHeight);
+
+                    //console.log(itemTargetWidth + 'x' + itemTargetHeight);
 
                     contentItemWrapper.width(itemTargetWidth);
                     contentItemWrapper.height(itemTargetHeight);
+
+                    //contentItemWrapper.find('content-item').width()
+                    //contentItemWrapper.find('content-height').height()
                 });
             }
 
-            function _redrawAllWithTargetHeight()
-            {
+            function _redrawAllWithTargetHeight() {
                 var jqContainer = $scope.contentItemsContainer;
-
-                console.log('rearrange for ' + jqContainer.children().length + ' items');
 
                 // phase 1: Scale to TargetHeight taking into account the item aspect
 
@@ -354,8 +368,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 });
             }
 
-            function _scaleAsRows()
-            {
+            function _scaleAsRows() {
                 var prevOffsetLeft = -1;
                 var row = [];
                 var rowNumber = 0;
@@ -374,7 +387,14 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         prevOffsetLeft = -1;
                     }
 
-                    contentItemWrapper.scope().rowNumber = rowNumber;
+                    if (contentItemWrapper.scope())
+                    {
+                        contentItemWrapper.scope().rowNumber = rowNumber;
+                    } else
+                    {
+                        console.log('WTF');
+                        console.log(contentItemWrapper);
+                    }
 
                     row.push(contentItemWrapper);
 
@@ -389,6 +409,13 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             }
 
             $scope.rearrange = function() {
+                $scope.rearrangeNeeded = false;
+
+                if (!$scope.contentItemWrappers.length)
+                {
+                    return;
+                }
+
                 console.log('phase 1: Scale all to target height');
                 _redrawAllWithTargetHeight();
 
@@ -397,6 +424,16 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     // phase 2: Scale rows so that they fills the whole width
                     console.log('phase 2: Scale rows to fill parent by width');
                     _scaleAsRows();
+
+                    $timeout(function() {
+                        console.log('broadcasting rerender-thumbnails');
+                        $scope.$broadcast('rerender-thumbnails', {
+                            thumbUrlResolver: function (thumbUrl, desiredWidth, desiredHeight)
+                            {
+                                return $scope.specificSizeThumbResolver()(thumbUrl, desiredWidth, desiredHeight);
+                            }
+                        });
+                    });
                 });
             }
         },
@@ -459,9 +496,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         $scope.contentItemWrappers.push(contentItemWrapper);
                     })
 
-                    //$timeout(function(){
-                        $scope.rearrange();
-                    //});
+                    $scope.rearrange();
                 }
             });
 
@@ -469,9 +504,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             $scope.$watch(function() {
                 return $scope.contentItemsContainer.width();
             }, function (newValue, oldValue) {
-                if (newValue !== oldValue)
+                if (newValue && oldValue && newValue !== oldValue)
                 {
-                    //console.log('viewport width changed from ' + oldValue + ' to ' + newValue);
+                    console.log('viewport width changed from ' + oldValue + ' to ' + newValue);
 
                     $scope.rearrangeNeeded = true;
 
@@ -480,7 +515,6 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         if ($scope.rearrangeNeeded)
                         {
                             $scope.rearrange();
-                            $scope.rearrangeNeeded = false;
                         }
 
                     }, 1000);

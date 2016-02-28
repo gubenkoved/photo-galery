@@ -23,6 +23,16 @@ namespace PhotoGalery2.Core.Implementation
             }
         }
 
+        public static Stream GenerateThumbinailExact(string path, Size exactSize)
+        {
+            _log.Debug(x => x("generating thumbnail for '{0}', max size={1}", path, exactSize));
+
+            using (var fileStream = new System.IO.FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return GenerateThumbinailExact(fileStream, exactSize);
+            }
+        }
+
         private static Stream GenerateThumbinail(Stream origImageStream, Size maxSize, out Size resultSize)
         {
             var resizedImageStream = new MemoryStream();
@@ -68,6 +78,31 @@ namespace PhotoGalery2.Core.Implementation
                 }
             }
         }
+
+        private static Stream GenerateThumbinailExact(Stream origImageStream, Size exactSize)
+        {
+            var resizedImageStream = new MemoryStream();
+            using (Image rawImage = Image.FromStream(origImageStream))
+            {
+                using (Bitmap image = new Bitmap(exactSize.Width, exactSize.Height))
+                {
+                    using (Graphics gr = Graphics.FromImage(image))
+                    {
+                        //gr.SmoothingMode = SmoothingMode.HighQuality;
+                        //gr.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        //gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        gr.DrawImage(rawImage, new Rectangle(0, 0, exactSize.Width, exactSize.Height));
+                    }
+
+                    image.Save(resizedImageStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                    resizedImageStream.Position = 0;
+
+                    return resizedImageStream;
+                }
+            }
+        }
+
 
         public static BasicMetadata GetBasicMetadata(string path)
         {

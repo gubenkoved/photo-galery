@@ -112,7 +112,8 @@ namespace PhotoGalery2.Server.Controllers
             string albumPath,
             string contentItemId,
             [FromUri] int w = 200,
-            [FromUri] int h = 200)
+            [FromUri] int h = 200,
+            [FromUri] bool enforceSourceAspectRatio = true)
         {
             if (w < 10 || h < 10)
             {
@@ -146,7 +147,8 @@ namespace PhotoGalery2.Server.Controllers
 
             var contentProvider = _factory.GetContentProvider();
 
-            var contentResult = contentProvider.GetThumbnail(album, contentItemId, new Size(w, h));
+            var contentResult = contentProvider.GetThumbnail(album, contentItemId,
+                new Size(w, h), enforceSourceAspectRatio);
 
             Request.RegisterForDispose(contentResult.Stream);
 
