@@ -447,12 +447,12 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         contentItemWrapper.append(contentItemDirective);
                         $scope.contentItemsContainer.append(contentItemWrapper);
 
-                        var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
-                        debugInfo.css({
-                            'font-size': '14px',
-                            'font-family': 'Consolas'
-                        });
-                        contentItemWrapper.append(debugInfo);
+                        // var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
+                        // debugInfo.css({
+                        //     'font-size': '14px',
+                        //     'font-family': 'Consolas'
+                        // });
+                        // contentItemWrapper.append(debugInfo);
 
                         $compile(contentItemWrapper)(contentItemScope);
 
