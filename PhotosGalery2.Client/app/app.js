@@ -315,15 +315,16 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     var itemTargetWidth = contentItemWrapper.width() * scaleFactor;
                     var itemTargetHeight = contentItemWrapper.height() * scaleFactor;
 
-                    itemTargetWidth = Math.floor(itemTargetWidth);
-                    itemTargetHeight = Math.floor(itemTargetHeight);
+                    //itemTargetWidth = Math.floor(itemTargetWidth);
+                    //itemTargetHeight = Math.floor(itemTargetHeight);
 
                     contentItemWrapper.width(itemTargetWidth);
                     contentItemWrapper.height(itemTargetHeight);
                 });
             }
 
-            $scope.rearrange = function() {
+            function _redrawAllWithTargetHeight()
+            {
                 var jqContainer = $scope.contentItemsContainer;
 
                 console.log('rearrange for ' + jqContainer.children().length + ' items');
@@ -349,13 +350,10 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         right: 0,
                     });
                 });
+            }
 
-                // phase 2: Scale rows so that they fills the whole width
-
-                //return;
-
-                console.log('phase 2');
-
+            function _scaleAsRows()
+            {
                 var prevOffsetLeft = -1;
                 var row = [];
                 var rowNumber = 0;
@@ -364,9 +362,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
 
                 angular.forEach($scope.contentItemWrappers, function(contentItemWrapper) {
 
-                    //console.log(contentItemWrapper.offsetLeft);
+                    //console.log(contentItemWrapper.offset().left);
 
-                    if (contentItemWrapper.offset().left < prevOffsetLeft)
+                    if (contentItemWrapper.offset().left <= prevOffsetLeft)
                     {
                         _scaleRow(row, targetRowWidth);
                         rowNumber += 1;
@@ -386,6 +384,18 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 {
                     _scaleRow(row, targetRowWidth);
                 }
+            }
+
+            $scope.rearrange = function() {
+                console.log('phase 1: Scale all to target height');
+                _redrawAllWithTargetHeight();
+
+                // timeout is needed to let browser rebuild DOM after first phase
+                $timeout(function () {
+                    // phase 2: Scale rows so that they fills the whole width
+                    console.log('phase 2: Scale rows to fill parent by width');
+                    _scaleAsRows();
+                });
             }
         },
         link: function ($scope, $el, $attr, $controller, $transclude) {
@@ -414,6 +424,13 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         
                         contentItemWrapper.append(contentItemDirective);
                         $scope.contentItemsContainer.append(contentItemWrapper);
+
+                        var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
+                        debugInfo.css({
+                            'font-size': '14px',
+                            'font-family': 'Consolas'
+                        });
+                        contentItemWrapper.append(debugInfo);
 
                         $compile(contentItemWrapper)(contentItemScope);
 
