@@ -1,4 +1,4 @@
-﻿var app = angular.module('app', ['ngRoute']);
+var app = angular.module('app', ['ngRoute']);
 
 app.config(['$routeProvider',
     function($routeProvider) {
@@ -321,38 +321,33 @@ app.directive('albumView', function ($compile, $timeout, $window) {
         templateUrl: '/app/directives/albumView.html',
         controller: function ($scope)
         {
-            $scope.contentItemWrappers = []
             $scope.targetHeight = $scope.targetHeight || 200;
             $scope.spacing = $scope.spacing || 3;
 
-            function _scaleRow(contentItemWrappersRow, targetWidth) {
+            function _scaleRow(itemsRow, targetWidth) {
                 console.log('scaling row');
 
                 targetWidth -= 5;
 
                 var currentWidth = 0;
 
-                angular.forEach(contentItemWrappersRow, function(contentItemWrapper) {
-                    currentWidth += contentItemWrapper.width();
+                angular.forEach(itemsRow, function(item) {
+                    currentWidth += item.width();
                 });
 
                 var scaleFactor = targetWidth / currentWidth;
 
-                angular.forEach(contentItemWrappersRow, function(contentItemWrapper) {
+                angular.forEach(itemsRow, function(item) {
+                    item = angular.element(item);
 
-                    var itemTargetWidth = contentItemWrapper.width() * scaleFactor;
-                    var itemTargetHeight = contentItemWrapper.height() * scaleFactor;
+                    var itemTargetWidth = item.width() * scaleFactor;
+                    var itemTargetHeight = item.height() * scaleFactor;
 
                     itemTargetWidth = Math.round(itemTargetWidth);
                     itemTargetHeight = Math.round(itemTargetHeight);
 
-                    //console.log(itemTargetWidth + 'x' + itemTargetHeight);
-
-                    contentItemWrapper.width(itemTargetWidth);
-                    contentItemWrapper.height(itemTargetHeight);
-
-                    //contentItemWrapper.find('content-item').width()
-                    //contentItemWrapper.find('content-height').height()
+                    item.width(itemTargetWidth);
+                    item.height(itemTargetHeight);
                 });
             }
 
@@ -361,23 +356,25 @@ app.directive('albumView', function ($compile, $timeout, $window) {
 
                 // phase 1: Scale to TargetHeight taking into account the item aspect
 
-                angular.forEach($scope.contentItemWrappers, function(contentItemWrapper) {
-                    var itemAspect = contentItemWrapper.scope().contentItem.origWidth / contentItemWrapper.scope().contentItem.origHeight;
+                var items = $scope.itemsRoot.children();
 
-                    contentItemWrapper.css('height', $scope.targetHeight + 'px');
-                    contentItemWrapper.css('width', itemAspect * $scope.targetHeight + 'px');
+                angular.forEach(items, function(item) {
+                    item = angular.element(item);
 
-                    contentItemWrapper.css({
+                    var itemAspect = angular.element(item).scope().aspect || 1;
+
+                    item.css({
+                        height: $scope.targetHeight + 'px',
+                        width: itemAspect * $scope.targetHeight + 'px',
                         position: 'relative'
                     });
 
-                    // set spacing between items
-                    contentItemWrapper.children().css('position', 'absolute');
-                    contentItemWrapper.children().css({
+                    item.children().css({
+                        position: 'absolute',
                         top: $scope.spacing + 'px',
                         left: $scope.spacing + 'px',
                         bottom: 0,
-                        right: 0,
+                        right: 0
                     });
                 });
             }
@@ -387,13 +384,15 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 var row = [];
                 var rowNumber = 0;
 
-                var targetRowWidth = $scope.contentItemsContainer.width();
+                var targetRowWidth = $scope.itemsRoot.width();
 
-                angular.forEach($scope.contentItemWrappers, function(contentItemWrapper) {
+                var items = $scope.itemsRoot.children();
 
+                angular.forEach(items, function(item) {
+                    item = angular.element(item);
                     //console.log(contentItemWrapper.offset().left);
 
-                    if (contentItemWrapper.offset().left <= prevOffsetLeft)
+                    if (item.offset().left <= prevOffsetLeft)
                     {
                         _scaleRow(row, targetRowWidth);
                         rowNumber += 1;
@@ -401,18 +400,18 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         prevOffsetLeft = -1;
                     }
 
-                    if (contentItemWrapper.scope())
+                    if (item.scope())
                     {
-                        contentItemWrapper.scope().rowNumber = rowNumber;
+                        item.scope().rowNumber = rowNumber;
                     } else
                     {
                         console.log('WTF');
-                        console.log(contentItemWrapper);
+                        console.log(item);
                     }
 
-                    row.push(contentItemWrapper);
+                    row.push(item);
 
-                    prevOffsetLeft = contentItemWrapper.offset().left;
+                    prevOffsetLeft = item.offset().left;
                 });
 
                 // scale last row
@@ -425,7 +424,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             $scope.rearrange = function() {
                 $scope.rearrangeNeeded = false;
 
-                if (!$scope.contentItemWrappers.length)
+                if (!$scope.itemsRoot.children().length)
                 {
                     return;
                 }
@@ -452,10 +451,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
             }
         },
         link: function ($scope, $el, $attr, $controller, $transclude) {
-            $scope.albumItemsContainer = $el.find('.album-items-root');
-
-            $scope.contentItemsContainer = $el.find('.content-items-root');
-            $scope.contentItemsContainer.css({
+            
+            $scope.itemsRoot = $el.find('.items-root');
+            $scope.itemsRoot.css({
                 'font-size': 0
             });
 
@@ -468,9 +466,18 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         var albumItemScope = $scope.$new();
                         albumItemScope.albumItem = albumItemModel;
 
+                        var itemWrapper = angular.element('<div></div>');
+                        itemWrapper.css({
+                            display: 'inline-block',
+                            margin: 0,
+                            padding: 0
+                        });
+                        itemWrapper.addClass('item-wrapper');
+                        
                         var albumItemDirective = angular.element('<div album-item item="albumItem" on-click="onAlbumClick()(albumItem)"></div>');
 
-                        $scope.albumItemsContainer.append(albumItemDirective);
+                        itemWrapper.append(albumItemDirective);
+                        $scope.itemsRoot.append(itemWrapper);
 
                         $compile(albumItemDirective)(albumItemScope);
                     });
@@ -479,6 +486,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     {
                         var contentItemScope = $scope.$new();
                         contentItemScope.contentItem = contentItemModel;
+                        contentItemScope.aspect = contentItemModel.origWidth / contentItemModel.origHeight;
 
                         var contentItemWrapper = angular.element('<div></div>');
                         contentItemWrapper.css({
@@ -486,12 +494,12 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                             margin: 0,
                             padding: 0
                         });
-                        contentItemWrapper.addClass('content-item-wrapper');
+                        contentItemWrapper.addClass('item-wrapper');
 
                         var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
                         
                         contentItemWrapper.append(contentItemDirective);
-                        $scope.contentItemsContainer.append(contentItemWrapper);
+                        $scope.itemsRoot.append(contentItemWrapper);
 
                         // var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
                         // debugInfo.css({
@@ -501,8 +509,6 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         // contentItemWrapper.append(debugInfo);
 
                         $compile(contentItemWrapper)(contentItemScope);
-
-                        $scope.contentItemWrappers.push(contentItemWrapper);
                     })
 
                     $scope.rearrange();
@@ -511,7 +517,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
 
             // listen for container size changes
             $scope.$watch(function() {
-                return $scope.contentItemsContainer.width();
+                return $scope.itemsRoot.width();
             }, function (newValue, oldValue) {
                 if (newValue && oldValue && newValue !== oldValue)
                 {
