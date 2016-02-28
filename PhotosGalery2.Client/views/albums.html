@@ -1,7 +1,10 @@
 ﻿<div ng-controller="AlbumsController as albums"
      ng-init="init()">
 
-    <button ng-click="getParentAlbum()">Parent album</button>
+    <nav>
+    	<button ng-click="getParentAlbum()">Up</button>
+    	<span class="album-name"> {{ currentAlbum.name }}</span>
+    </nav>
 
     <br />
 
