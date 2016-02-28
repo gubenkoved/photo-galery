@@ -16,7 +16,8 @@ app.config(['$routeProvider',
             controller: 'NotFoundController'
         }).
         when('/test', {
-            templateUrl: 'views/test.html'
+            templateUrl: 'views/test.html',
+            controller: 'TestController'
         }).
         when('/', {
             redirectTo: '/albums'
@@ -195,6 +196,25 @@ app.controller('AboutController', ['$scope', 'config', function($scope, config) 
 app.controller('NotFoundController', ['$scope', function($scope) {}]);
 
 
+app.controller('TestController', ['$scope', function($scope){
+    $scope.album = {
+        name: 'Test album',
+        url: 'http://example.com',
+        parentUrl: 'http://example.com',
+        fullPath: ':testAlbum',
+
+        albumItems: [
+            { name: 'A1', url: '' },
+            { name: 'A2', url: '' }
+        ],
+        contentItems: [
+            {name: 'C1', url: '', thumbUrl: 'https://goo.gl/fMLlXF', origWidth: 640, origHeight: 480 },
+            {name: 'C2', url: '', thumbUrl: 'https://goo.gl/fMLlXF', origWidth: 640, origHeight: 480 },
+            {name: 'C3', url: '', thumbUrl: 'https://goo.gl/fMLlXF', origWidth: 640, origHeight: 480 },
+        ]
+    }
+}]);
+
 /* DIRECTIVES */
 
 app.directive('contentItem', function($timeout) {
@@ -263,6 +283,158 @@ app.directive('albumItem', function() {
         templateUrl: '/app/directives/albumItem.html'
     };
 });
+
+app.directive('albumView', function ($compile, $timeout, $window) {
+    return {
+        scope: {
+            album: '='
+        },
+        restrict: 'A',
+        templateUrl: '/app/directives/albumView.html',
+        controller: function ($scope)
+        {
+            $scope.contentItemWrappers = []
+            $scope.targetHeight = 200;
+            $scope.spacing = 3;
+
+            function _scaleRow(contentItemWrappersRow, targetWidth)
+            {
+                console.log('scaling row');
+
+                targetWidth -= 5;
+
+                var currentWidth = 0;
+
+                angular.forEach(contentItemWrappersRow, function(contentItemWrapper) {
+                    currentWidth += contentItemWrapper.width();
+                });
+
+                var scaleFactor = targetWidth / currentWidth;
+
+                angular.forEach(contentItemWrappersRow, function(contentItemWrapper) {
+                    var itemTargetWidth = contentItemWrapper.width() * scaleFactor;
+                    var itemTargetHeight = contentItemWrapper.height() * scaleFactor;
+
+                    itemTargetWidth = Math.floor(itemTargetWidth);
+                    itemTargetHeight = Math.floor(itemTargetHeight);
+
+                    contentItemWrapper.width(itemTargetWidth);
+                    contentItemWrapper.height(itemTargetHeight);
+                });
+            }
+
+            $scope.rearrange = function() {
+                var jqContainer = $scope.contentItemsContainer;
+
+                console.log('rearrange for ' + jqContainer.children().length + ' items');
+
+                // phase 1: Scale to TargetHeight taking into account the item aspect
+
+                angular.forEach($scope.contentItemWrappers, function(contentItemWrapper) {
+                    var itemAspect = contentItemWrapper.scope().contentItem.origWidth / contentItemWrapper.scope().contentItem.origHeight;
+
+                    contentItemWrapper.css('height', $scope.targetHeight + 'px');
+                    contentItemWrapper.css('width', itemAspect * $scope.targetHeight + 'px');
+
+                    contentItemWrapper.css({
+                        position: 'relative'
+                    });
+
+                    // set spacing between items
+                    contentItemWrapper.children().css('position', 'absolute');
+                    contentItemWrapper.children().css({
+                        top: $scope.spacing + 'px',
+                        left: $scope.spacing + 'px',
+                        bottom: 0,
+                        right: 0,
+                    });
+                });
+
+                // phase 2: Scale rows so that they fills the whole width
+
+                //return;
+
+                console.log('phase 2');
+
+                var prevOffsetLeft = -1;
+                var row = [];
+                var rowNumber = 0;
+
+                var targetRowWidth = $scope.contentItemsContainer.width();
+
+                angular.forEach($scope.contentItemWrappers, function(contentItemWrapper) {
+
+                    //console.log(contentItemWrapper.offsetLeft);
+
+                    if (contentItemWrapper.offset().left < prevOffsetLeft)
+                    {
+                        _scaleRow(row, targetRowWidth);
+                        rowNumber += 1;
+                        row = [];
+                        prevOffsetLeft = -1;
+                    }
+
+                    contentItemWrapper.scope().rowNumber = rowNumber;
+
+                    row.push(contentItemWrapper);
+
+                    prevOffsetLeft = contentItemWrapper.offset().left;
+                });
+
+                // scale last row
+                if (row.length >= 3)
+                {
+                    _scaleRow(row, targetRowWidth);
+                }
+            }
+        },
+        link: function ($scope, $el, $attr, $controller, $transclude) {
+            $scope.contentItemsContainer = $el.find('.contentItemsRoot');
+            $scope.contentItemsContainer.css({
+                'font-size': 0
+            });
+
+            $scope.$watch('album', function (newValue, oldValue)
+            {
+                if (newValue)
+                {
+                    angular.forEach($scope.album.contentItems, function (contentItemModel)
+                    {
+                        var contentItemScope = $scope.$new();
+                        contentItemScope.contentItem = contentItemModel;
+
+                        var contentItemWrapper = angular.element('<div></div>');
+                        contentItemWrapper.css({
+                            display: 'inline-block',
+                            margin: 0,
+                            padding: 0
+                        });
+
+                        var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
+                        
+                        contentItemWrapper.append(contentItemDirective);
+                        $scope.contentItemsContainer.append(contentItemWrapper);
+
+                        $compile(contentItemWrapper)(contentItemScope);
+
+                        $scope.contentItemWrappers.push(contentItemWrapper);
+                    })
+
+                    //$timeout(function(){
+                        $scope.rearrange();
+                    //});
+                }
+            });
+
+            angular.element($window).bind('resize', function () {
+                console.log('viewport changed!');
+                $scope.rearrange();
+            });
+            
+            // listen for container size changes
+        }
+    };
+})
 
 app.directive('test', function() {
     return {
