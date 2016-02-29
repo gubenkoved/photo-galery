@@ -352,11 +352,29 @@ app.directive('contentItem', function(AlbumsService) {
             var img = $el.find('img');
 
             $scope.$on('rerender-thumbnails', function (event, args) {
-                console.log('[thumb-rerender-ci]');
+                
                 if (!$scope.$$destroyed)
                 {
-                    var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, img.width(), img.height());
-                    img.attr('src', url);
+                    var currentWidth = img.width();
+                    var currentHeight = img.height();
+
+                    if (!$scope.lastRenderedWith
+                        || $scope.lastRenderedWith.width !== currentWidth
+                        || $scope.lastRenderedWith.height !== currentHeight)
+                    {
+                        console.log('[thumb-rerender-ci]');
+
+                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, currentWidth, currentHeight);
+                        img.attr('src', url);
+
+                        $scope.lastRenderedWith = {
+                            width: currentWidth,
+                            height: currentHeight
+                        };
+                    } else
+                    {
+                        //console.log('[thumb-rerender-ci] skip');
+                    }
                 }
             });
 
@@ -405,7 +423,8 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             album: '=',
             spacing: '@',
             targetHeight: '@',
-            onAlbumClick: '&'
+            onAlbumClick: '&',
+            lazyLoadingBatchSize: '@'
         },
         restrict: 'A',
         templateUrl: '/app/directives/albumView.html',
@@ -413,6 +432,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
         {
             $scope.targetHeight = $scope.targetHeight || 200;
             $scope.spacing = $scope.spacing || 3;
+            $scope.lazyLoadingBatchSize = $scope.lazyLoadingBatchSize || 12;
 
             function _scaleRow(itemsRow, targetWidth) {
                 console.log('scaling row');
@@ -517,9 +537,14 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
                 console.log('appendRearrageBatch for ' + items.length);
 
+                if (!(items instanceof Array))
+                {
+                    items = items.toArray();
+                }
+
                 //debugger;
                 // pick up the rest of items from last run
-                var items = $scope._buffer.concat(items);
+                items = items.concat($scope._buffer);
 
                 //console.log('appendRearrageBatch2 for ' + items.length);
 
@@ -543,11 +568,24 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     });
             }
 
+            $scope.rearrangeAll = function ()
+            {
+                // ToDo: Exclude _buffer items from here
+                var items = $scope.itemsRoot.children();
+
+                return _redrawWithTargetHeight(items)
+                    .then(_scaleAsRows(items))
+                    .then(function () {
+                        console.log('broadcasting rerender-thumbnails');
+                        $scope.$broadcast('rerender-thumbnails');
+                    });
+            }
+
             $scope.lastContentItemIndex = -1;
             $scope.getNewContentItemsBatchToRender = function ()
             {
                 var start = $scope.lastContentItemIndex + 1;
-                var to = start + 20; // batch size
+                var to = start + $scope.lazyLoadingBatchSize;
                 $scope.lastContentItemIndex = to;
 
                 var items = [];
@@ -588,13 +626,30 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
             $scope.loadMoreContentItems = function ()
             {
-                if ($scope.lastContentItemIndex >= $scope.album.contentItems.length)
-                {
-                    console.log('all set!');
-                }
+                var loadFunc = function () {
+                    if ($scope.lastContentItemIndex >= $scope.album.contentItems.length)
+                    {
+                        console.log('[lazy-loading] all set!');
+                    } else
+                    {
+                        console.log('[lazy-loading] request more items');
+                    }
 
-                var toRender = $scope.getNewContentItemsBatchToRender();
-                return $scope.appendRearrageBatch(toRender);
+                    var toRender = $scope.getNewContentItemsBatchToRender();
+                    return $scope.appendRearrageBatch(toRender);
+                };
+
+                if (!$scope.album)
+                {
+                    $scope.$watch('album', function (newValue)
+                    {
+                        if (newValue)
+                            loadFunc();
+                    });
+                } else
+                {
+                    return loadFunc();
+                }
             }
         },
         link: function ($scope, $el, $attr) {
@@ -632,8 +687,8 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     console.log('rearrange after link');
 
                     // render album items
-                    $scope.appendRearrageBatch($scope.itemsRoot.children())
-                        .then($scope.loadMoreContentItems);
+                    $scope.appendRearrageBatch($scope.itemsRoot.children());
+                        //.then($scope.loadMoreContentItems);
                 }
             });
 
@@ -651,7 +706,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
                         if ($scope.rearrangeNeeded)
                         {
-                            $scope.rearrange();
+                            $scope.rearrangeAll();
                         }
 
                     }, 1000);
