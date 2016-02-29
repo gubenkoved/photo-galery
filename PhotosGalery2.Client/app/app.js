@@ -34,7 +34,7 @@ app.config(function($httpProvider) {
 });
 
 app.constant('config', {
-    apiRoot: 'http://localhost:59999/api',
+    apiRoot: 'http://192.168.1.2:59999/api',
     ver: '1.0.0.0',
 
     desiredThumbSize: {
@@ -180,9 +180,11 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
 
 /* CONTROLLERS */
 
-app.controller('AlbumsController', ['$scope', '$routeParams', '$route', 'AlbumsService',
-    function($scope, $routeParams, $route, AlbumsService) {
+app.controller('AlbumsController',
+    function($scope, $routeParams, $route, $location, AlbumsService) {
         $scope.init = function() {
+            console.log('AlbumsController.init');
+            
             AlbumsService.resolve($routeParams.albumPath)
                 .then(function(targetAlbumUrl) {
                     $scope.getAlbum(targetAlbumUrl);
@@ -220,7 +222,7 @@ app.controller('AlbumsController', ['$scope', '$routeParams', '$route', 'AlbumsS
             console.log(o);
         }
     }
-]);
+);
 
 app.controller('AboutController', ['$scope', 'config', function($scope, config) {
     $scope.config = config;
@@ -288,16 +290,19 @@ app.directive('contentItem', function(AlbumsService) {
         scope: {
             item: '='
         },
-        templateUrl: '/app/directives/contentItem.html',
+        //templateUrl: '/app/directives/contentItem.html',
+        template:
+            '<div item-name="{{ item.name }}" style="width: 100%; height: 100%">' +
+                '<img spinner2 />' +
+            '</div>',
         //require: '^ablumView'
         link: function($scope, $el, $attrs) {
             var img = $el.find('img');
 
             $scope.$on('rerender-thumbnails', function (event, args) {
-                //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
+                console.log('[thumb-rerender-ci]');
                 if (!$scope.$$destroyed)
                 {
-                    //debugger;
                     var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, img.width(), img.height());
                     img.attr('src', url);
                 }
@@ -314,19 +319,24 @@ app.directive('albumItem', function(AlbumsService) {
             item: '=',
             onClick: '&'
         },
-        templateUrl: '/app/directives/albumItem.html',
+        //templateUrl: '/app/directives/albumItem.html',
+        template:
+            '<div class="album-item-content" ng-click="onClick()(item)" style="width: 100%; height: 100%">'+
+                '<img spinner2 />' +
+                '<a>{{ item.name }}</a>' +
+            '</div>',
         link: function($scope, $el, $attrs) {
             var img = $el.find('img');
 
             $scope.$on('rerender-thumbnails', function (event, args) {
-                //console.log('[thumb-rerender] ' + img.width() + 'x' + img.height());
+                console.log('[thumb-rerender-ai]');
                 if (!$scope.$$destroyed)
                 {
                     if ($scope.item.thumbUrl)
                     {
                         var s = Math.max(img.width(), img.height())
-
                         var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, s, s, true);
+
                         img.attr('src', url);
                     }
                 }
@@ -433,7 +443,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         item.scope().rowNumber = rowNumber;
                     } else
                     {
+
                         console.log('WTF');
+                        //console.log(item.scope().$destroyed);
                         console.log(item);
                     }
 
@@ -462,18 +474,25 @@ app.directive('albumView', function ($compile, $timeout, $window) {
 
                 // timeout is needed to let browser rebuild DOM after first phase
                 $timeout(function () {
+                    
+                    if ($scope.$$destroyed)
+                    {
+                        console.log('the scope has been destroed - skip further rearrange');
+                        return;
+                    }
+
                     // phase 2: Scale rows so that they fills the whole width
                     console.log('phase 2: Scale rows to fill parent by width');
                     _scaleAsRows();
 
-                    $timeout(function() {
+                    //$timeout(function() {
                         console.log('broadcasting rerender-thumbnails');
                         $scope.$broadcast('rerender-thumbnails');
-                    });
+                    //});
                 });
             }
         },
-        link: function ($scope, $el, $attr, $controller, $transclude) {
+        link: function ($scope, $el, $attr) {
             
             $scope.itemsRoot = $el.find('.items-root');
             $scope.itemsRoot.css({
@@ -534,6 +553,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         $compile(contentItemWrapper)(contentItemScope);
                     })
 
+                    console.log('rearrange after link');
                     $scope.rearrange();
                 }
             });
@@ -590,14 +610,11 @@ app.directive('test', function() {
 
 /* APP RUN */
 
-angular.module('app')
-    .run(['$rootScope', function($rootScope) {
+app.run(['$rootScope', function($rootScope) {
+    $rootScope.lastRequestId = 0;
+    $rootScope.nextRequestId = function() {
+        $rootScope.lastRequestId += 1;
 
-        $rootScope.lastRequestId = 0;
-
-        $rootScope.nextRequestId = function() {
-            $rootScope.lastRequestId += 1;
-
-            return $rootScope.lastRequestId;
-        }
-    }]);
+        return $rootScope.lastRequestId;
+    }
+}]);
