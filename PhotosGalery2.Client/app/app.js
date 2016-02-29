@@ -436,7 +436,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
             function _scaleRow(itemsRow, targetWidth) {
                 console.log('scaling row');
-                console.log(itemsRow);
+                //console.log(itemsRow);
 
                 targetWidth -= 5;
 
