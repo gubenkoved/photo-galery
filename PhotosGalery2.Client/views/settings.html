@@ -5,11 +5,18 @@
 
 	<br />
 
-	<label for="sapcing">Spacing</label>
+	<label>Spacing</label>
 	<input type="number" min="0" max="10" required 
-		id="spacing" ng-model="config['album-view.spacing']"> </input>
+		ng-model="config['albumView.spacing']"> </input>
 
 	<br />
 
+	<label>Desired item height</label>
+	<input type="number" min="50" max="1000" required
+		ng-model="config['albumView.targetHeight']"> </input>
+
+	<br />
+
+	<button ng-click="restoreDefault()">Restore default</button>
 	<button ng-click="saveConfig()">Save</button>
 </div>

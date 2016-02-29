@@ -51,7 +51,8 @@ app.constant('defaultConfig', {
     // loading on API side is increased however by enablig this
     avoidClientSideResize: true,
 
-    'album-view.spacing': 5
+    'albumView.spacing': 5,
+    'albumView.targetHeight': 200
 });
 
 /* INTERCEPTORS */
@@ -76,14 +77,19 @@ app.factory('http404Interceptor', function($q, $window) {
 app.service('ConfigService', function (defaultConfig, localStorageService) {
     var service = {}
 
-    service.getConfig = function()
+    service.get = function()
     {
         return localStorageService.get('config') || angular.extend({}, defaultConfig);
     }
 
-    service.saveConfig = function(config)
+    service.save = function(config)
     {
         localStorageService.set('config', config);
+    }
+
+    service.restoreDefault = function(config)
+    {
+        localStorageService.set('config', angular.extend({}, defaultConfig));
     }
 
     return service;
@@ -146,7 +152,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
         width = width || 13;
         height = height || 13;
 
-        if (ConfigService.getConfig().avoidClientSideResize)
+        if (ConfigService.get().avoidClientSideResize)
         {
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
@@ -157,8 +163,8 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
             }
         } else
         {
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', ConfigService.getConfig().desiredThumbSize.width);
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', ConfigService.getConfig().desiredThumbSize.height);            
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', ConfigService.get().desiredThumbSize.width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', ConfigService.get().desiredThumbSize.height);            
         }
 
         return thumbUrl;
@@ -166,7 +172,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 
     service.getAlbumItems = function(albumUrl) {
         if (!albumUrl) {
-            return $http.get(ConfigService.getConfig().apiRoot + '/albums')
+            return $http.get(ConfigService.get().apiRoot + '/albums')
                 .then(function(response) {
                     return mapAlbumsResponse(response.data);
                 });
@@ -182,7 +188,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
         console.log('resolve: ' + albumPath);
 
         if (albumPath) {
-            return $http.get(ConfigService.getConfig().apiRoot + '/resolve/' + albumPath)
+            return $http.get(ConfigService.get().apiRoot + '/resolve/' + albumPath)
                 .then(function(response) {
                     console.log(response.data);
 
@@ -190,7 +196,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
                 });
         } else {
             return $q(function(resolve, reject) {
-                resolve(ConfigService.getConfig().apiRoot + '/albums');
+                resolve(ConfigService.get().apiRoot + '/albums');
             });
         }
     }
@@ -204,7 +210,8 @@ app.controller('AlbumsController',
     function($scope, $routeParams, $route, $location, AlbumsService, ConfigService) {
 
         //debugger;
-        $scope.spacing = ConfigService.getConfig()['album-view.spacing'];
+        $scope.spacing = ConfigService.get()['albumView.spacing'];
+        $scope.targetHeight = ConfigService.get()['albumView.targetHeight'];
 
         $scope.init = function() {
             console.log('AlbumsController.init');
@@ -249,15 +256,21 @@ app.controller('AlbumsController',
 );
 
 app.controller('AboutController', function($scope, ConfigService) {
-    $scope.config = ConfigService.getConfig();
+    $scope.config = ConfigService.get();
 });
 
 app.controller('SettingsController', function($scope, ConfigService) {
-    $scope.config = ConfigService.getConfig();
+    $scope.config = ConfigService.get();
 
     $scope.saveConfig = function ()
     {
-        ConfigService.saveConfig($scope.config);
+        ConfigService.save($scope.config);
+    }
+
+    $scope.restoreDefault = function ()
+    {
+        ConfigService.restoreDefault($scope.config);
+        $scope.config = ConfigService.get();
     }
 });
 
