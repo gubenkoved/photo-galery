@@ -1,3 +1,7 @@
 <div class="items-root">
 	<!-- both album and content items live here -->
 </div>
+
+<div in-view="$inview && album && loadMoreContentItems()"
+	style="height: 10px; position: relative; top: -{{ 2 * targetHeight }}px;">
+</div>

@@ -9,9 +9,10 @@
 		display: inline-flex;
 
 		width: 100px;
-		height: 100px;
+		height: 200px;
 
 		background-color: red;
+		margin: 10px;
 	}
 
 	.item
@@ -79,7 +80,7 @@
 			<a>test</a>
 		</div>
 	</div>
-	<div class="item-wrap">
+	<div class="item-wrap" in-view="$inview && testFunc()">
 		<div class="item">
 			<a>test</a>
 		</div>

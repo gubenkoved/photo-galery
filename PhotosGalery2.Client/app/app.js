@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ngRoute', 'LocalStorageModule']);
+var app = angular.module('app', ['ngRoute', 'LocalStorageModule', 'angular-inview']);
 
 app.config(['$routeProvider',
     function($routeProvider) {
@@ -293,6 +293,13 @@ app.controller('TestController', ['$scope', function($scope){
             {name: 'C3', url: '', thumbUrl: 'https://goo.gl/fMLlXF', origWidth: 640, origHeight: 480 },
         ]
     }
+
+    $scope.testFunc = function ()
+    {
+        console.log('test func!');
+    }
+
+    //$scope.
 }]);
 
 /* DIRECTIVES */
@@ -501,11 +508,18 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             // up on next call;
             $scope.appendRearrageBatch = function (items)
             {
+                if (!items || !items.length)
+                {
+                    return $q(function(resolve, reject) {
+                        resolve(null)
+                    });
+                }
+
                 console.log('appendRearrageBatch for ' + items.length);
 
                 //debugger;
                 // pick up the rest of items from last run
-                var items = $scope._buffer.concat(items.toArray());
+                var items = $scope._buffer.concat(items);
 
                 //console.log('appendRearrageBatch2 for ' + items.length);
 
@@ -527,6 +541,60 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                         console.log('broadcasting rerender-thumbnails');
                         $scope.$broadcast('rerender-thumbnails');
                     });
+            }
+
+            $scope.lastContentItemIndex = -1;
+            $scope.getNewContentItemsBatchToRender = function ()
+            {
+                var start = $scope.lastContentItemIndex + 1;
+                var to = start + 20; // batch size
+                $scope.lastContentItemIndex = to;
+
+                var items = [];
+
+                angular.forEach($scope.album.contentItems.slice(start, to), function (contentItemModel)
+                {
+                    var contentItemScope = $scope.$new();
+                    contentItemScope.contentItem = contentItemModel;
+                    contentItemScope.aspect = contentItemModel.origWidth / contentItemModel.origHeight;
+
+                    var contentItemWrapper = angular.element('<div></div>');
+                    contentItemWrapper.css({
+                        display: 'inline-block',
+                        margin: 0,
+                        padding: 0
+                    });
+                    contentItemWrapper.addClass('item-wrapper');
+
+                    var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
+                    
+                    contentItemWrapper.append(contentItemDirective);
+                    $scope.itemsRoot.append(contentItemWrapper);
+
+                    // var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
+                    // debugInfo.css({
+                    //     'font-size': '14px',
+                    //     'font-family': 'Consolas'
+                    // });
+                    // contentItemWrapper.append(debugInfo);
+
+                    $compile(contentItemWrapper)(contentItemScope);
+
+                    items.push(contentItemWrapper);
+                })
+
+                return items;
+            }
+
+            $scope.loadMoreContentItems = function ()
+            {
+                if ($scope.lastContentItemIndex >= $scope.album.contentItems.length)
+                {
+                    console.log('all set!');
+                }
+
+                var toRender = $scope.getNewContentItemsBatchToRender();
+                return $scope.appendRearrageBatch(toRender);
             }
         },
         link: function ($scope, $el, $attr) {
@@ -561,39 +629,11 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                         $compile(albumItemDirective)(albumItemScope);
                     });
 
-                    angular.forEach($scope.album.contentItems.slice(0, 20), function (contentItemModel)
-                    {
-                        var contentItemScope = $scope.$new();
-                        contentItemScope.contentItem = contentItemModel;
-                        contentItemScope.aspect = contentItemModel.origWidth / contentItemModel.origHeight;
-
-                        var contentItemWrapper = angular.element('<div></div>');
-                        contentItemWrapper.css({
-                            display: 'inline-block',
-                            margin: 0,
-                            padding: 0
-                        });
-                        contentItemWrapper.addClass('item-wrapper');
-
-                        var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
-                        
-                        contentItemWrapper.append(contentItemDirective);
-                        $scope.itemsRoot.append(contentItemWrapper);
-
-                        // var debugInfo = angular.element('<div> #{{ rowNumber }} </div>');
-                        // debugInfo.css({
-                        //     'font-size': '14px',
-                        //     'font-family': 'Consolas'
-                        // });
-                        // contentItemWrapper.append(debugInfo);
-
-                        $compile(contentItemWrapper)(contentItemScope);
-                    })
-
                     console.log('rearrange after link');
-                    //$scope.rearrange();
 
-                    $scope.appendRearrageBatch($scope.itemsRoot.children());
+                    // render album items
+                    $scope.appendRearrageBatch($scope.itemsRoot.children())
+                        .then($scope.loadMoreContentItems);
                 }
             });
 
