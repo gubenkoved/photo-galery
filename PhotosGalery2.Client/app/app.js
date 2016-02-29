@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ngRoute']);
+var app = angular.module('app', ['ngRoute', 'LocalStorageModule']);
 
 app.config(['$routeProvider',
     function($routeProvider) {
@@ -19,6 +19,10 @@ app.config(['$routeProvider',
             templateUrl: 'views/test.html',
             controller: 'TestController'
         }).
+        when('/settings', {
+            templateUrl: 'views/settings.html',
+            controller: 'SettingsController'
+        }).
         when('/', {
             redirectTo: '/albums'
         }).
@@ -33,7 +37,7 @@ app.config(function($httpProvider) {
     $httpProvider.interceptors.push('http404Interceptor');
 });
 
-app.constant('config', {
+app.constant('defaultConfig', {
     apiRoot: 'http://192.168.1.2:59999/api',
     ver: '1.0.0.0',
 
@@ -45,7 +49,9 @@ app.constant('config', {
     // this improves image quality by requesting exact size from server
     // that is needed to show in browser w/o any conversion
     // loading on API side is increased however by enablig this
-    avoidClientSideResize: true
+    avoidClientSideResize: true,
+
+    'album-view.spacing': 5
 });
 
 /* INTERCEPTORS */
@@ -67,7 +73,23 @@ app.factory('http404Interceptor', function($q, $window) {
 
 /* SERVICES */
 
-app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $q) {
+app.service('ConfigService', function (defaultConfig, localStorageService) {
+    var service = {}
+
+    service.getConfig = function()
+    {
+        return localStorageService.get('config') || angular.extend({}, defaultConfig);
+    }
+
+    service.saveConfig = function(config)
+    {
+        localStorageService.set('config', config);
+    }
+
+    return service;
+});
+
+app.service('AlbumsService', function($http, ConfigService, $q) {
     var service = {};
 
     function _updateQueryStringParameter(uri, key, value) {
@@ -80,8 +102,6 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         return uri + separator + key + "=" + value;
       }
     }
-
-    
 
     function mapAlbumsResponse(apiResult) {
         var r = {
@@ -126,7 +146,7 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         width = width || 13;
         height = height || 13;
 
-        if (config.avoidClientSideResize)
+        if (ConfigService.getConfig().avoidClientSideResize)
         {
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', width);
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
@@ -137,8 +157,8 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
             }
         } else
         {
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', config.desiredThumbSize.width);
-            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', config.desiredThumbSize.height);            
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', ConfigService.getConfig().desiredThumbSize.width);
+            thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', ConfigService.getConfig().desiredThumbSize.height);            
         }
 
         return thumbUrl;
@@ -146,7 +166,7 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
 
     service.getAlbumItems = function(albumUrl) {
         if (!albumUrl) {
-            return $http.get(config.apiRoot + '/albums')
+            return $http.get(ConfigService.getConfig().apiRoot + '/albums')
                 .then(function(response) {
                     return mapAlbumsResponse(response.data);
                 });
@@ -162,7 +182,7 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
         console.log('resolve: ' + albumPath);
 
         if (albumPath) {
-            return $http.get(config.apiRoot + '/resolve/' + albumPath)
+            return $http.get(ConfigService.getConfig().apiRoot + '/resolve/' + albumPath)
                 .then(function(response) {
                     console.log(response.data);
 
@@ -170,18 +190,22 @@ app.service('AlbumsService', ["$http", "config", "$q", function($http, config, $
                 });
         } else {
             return $q(function(resolve, reject) {
-                resolve(config.apiRoot + '/albums');
+                resolve(ConfigService.getConfig().apiRoot + '/albums');
             });
         }
     }
 
     return service;
-}]);
+});
 
 /* CONTROLLERS */
 
 app.controller('AlbumsController',
-    function($scope, $routeParams, $route, $location, AlbumsService) {
+    function($scope, $routeParams, $route, $location, AlbumsService, ConfigService) {
+
+        //debugger;
+        $scope.spacing = ConfigService.getConfig()['album-view.spacing'];
+
         $scope.init = function() {
             console.log('AlbumsController.init');
             
@@ -224,12 +248,20 @@ app.controller('AlbumsController',
     }
 );
 
-app.controller('AboutController', ['$scope', 'config', function($scope, config) {
-    $scope.config = config;
-}]);
+app.controller('AboutController', function($scope, ConfigService) {
+    $scope.config = ConfigService.getConfig();
+});
+
+app.controller('SettingsController', function($scope, ConfigService) {
+    $scope.config = ConfigService.getConfig();
+
+    $scope.saveConfig = function ()
+    {
+        ConfigService.saveConfig($scope.config);
+    }
+});
 
 app.controller('NotFoundController', ['$scope', function($scope) {}]);
-
 
 app.controller('TestController', ['$scope', function($scope){
     $scope.album = {

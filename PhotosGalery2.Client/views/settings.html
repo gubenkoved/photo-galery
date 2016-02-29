@@ -1,0 +1,15 @@
+﻿<h2>Settings</h2>
+<div>
+	<label>High quality thumbnails</label>
+	<input type="checkbox" ng-model="config.avoidClientSideResize"></input>
+
+	<br />
+
+	<label for="sapcing">Spacing</label>
+	<input type="number" min="0" max="10" required 
+		id="spacing" ng-model="config['album-view.spacing']"> </input>
+
+	<br />
+
+	<button ng-click="saveConfig()">Save</button>
+</div>
