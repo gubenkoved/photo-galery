@@ -392,7 +392,7 @@ app.directive('albumItem', function(AlbumsService) {
     };
 });
 
-app.directive('albumView', function ($compile, $timeout, $window) {
+app.directive('albumView', function ($compile, $timeout, $window, $q) {
     return {
         scope: {
             album: '=',
@@ -434,13 +434,8 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                 });
             }
 
-            function _redrawAllWithTargetHeight() {
-                var jqContainer = $scope.contentItemsContainer;
-
-                // phase 1: Scale to TargetHeight taking into account the item aspect
-
-                var items = $scope.itemsRoot.children();
-
+            // returns promise that is resolved when DOM is finally rendered
+            function _redrawWithTargetHeight(items) {
                 angular.forEach(items, function(item) {
                     item = angular.element(item);
 
@@ -460,38 +455,34 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         right: 0
                     });
                 });
+
+                // return promise that is resolved as soon as DOm is rendered
+                return $timeout(function() {});
             }
 
-            function _scaleAsRows() {
+            function _scaleAsRows(items) {
+
+                console.log('_scaleAsRows for ' + items.length);
+
                 var prevOffsetLeft = -1;
                 var row = [];
                 var rowNumber = 0;
 
                 var targetRowWidth = $scope.itemsRoot.width();
 
-                var items = $scope.itemsRoot.children();
-
                 angular.forEach(items, function(item) {
-                    item = angular.element(item);
-                    //console.log(contentItemWrapper.offset().left);
 
-                    if (item.offset().left <= prevOffsetLeft)
-                    {
+                    item = angular.element(item);
+
+                    if (item.offset().left <= prevOffsetLeft) {
                         _scaleRow(row, targetRowWidth);
                         rowNumber += 1;
                         row = [];
                         prevOffsetLeft = -1;
                     }
 
-                    if (item.scope())
-                    {
+                    if (item.scope()) {
                         item.scope().rowNumber = rowNumber;
-                    } else
-                    {
-
-                        console.log('WTF');
-                        //console.log(item.scope().$destroyed);
-                        console.log(item);
                     }
 
                     row.push(item);
@@ -499,42 +490,43 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     prevOffsetLeft = item.offset().left;
                 });
 
-                // scale last row
-                if (row.length >= 3)
-                {
-                    _scaleRow(row, targetRowWidth);
-                }
+                // returm promise that will wait for DOM render
+                return $timeout(function() {});
             }
 
-            $scope.rearrange = function() {
-                $scope.rearrangeNeeded = false;
+            $scope._buffer = []
 
-                if (!$scope.itemsRoot.children().length)
-                {
-                    return;
-                }
+            // takes batch of items and adds them to DOM and aligns properly without leaving non-filled row;
+            // maintains rest of items from batch that are not rendered in buffer and automatically pickes them
+            // up on next call;
+            $scope.appendRearrageBatch = function (items)
+            {
+                console.log('appendRearrageBatch for ' + items.length);
 
-                console.log('phase 1: Scale all to target height');
-                _redrawAllWithTargetHeight();
+                //debugger;
+                // pick up the rest of items from last run
+                var items = $scope._buffer.concat(items.toArray());
 
-                // timeout is needed to let browser rebuild DOM after first phase
-                $timeout(function () {
-                    
-                    if ($scope.$$destroyed)
-                    {
-                        console.log('the scope has been destroed - skip further rearrange');
-                        return;
-                    }
+                //console.log('appendRearrageBatch2 for ' + items.length);
 
-                    // phase 2: Scale rows so that they fills the whole width
-                    console.log('phase 2: Scale rows to fill parent by width');
-                    _scaleAsRows();
+                return _redrawWithTargetHeight(items)
+                    .then(_scaleAsRows(items))
+                    .then(function () {
+                        // figure out last row items to be subject of repeated rearrange on next call
 
-                    //$timeout(function() {
+                        $scope._buffer = [];
+                        var lastRowNum = angular.element(items[items.length - 1]).scope().rowNumber;
+
+                        angular.forEach(items, function(item) {
+                            if (angular.element(item).scope().rowNumber === lastRowNum) {
+                                $scope._buffer.push(item);
+                            }
+                        });
+                    })
+                    .then(function () {
                         console.log('broadcasting rerender-thumbnails');
                         $scope.$broadcast('rerender-thumbnails');
-                    //});
-                });
+                    });
             }
         },
         link: function ($scope, $el, $attr) {
@@ -569,7 +561,7 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                         $compile(albumItemDirective)(albumItemScope);
                     });
 
-                    angular.forEach($scope.album.contentItems, function (contentItemModel)
+                    angular.forEach($scope.album.contentItems.slice(0, 20), function (contentItemModel)
                     {
                         var contentItemScope = $scope.$new();
                         contentItemScope.contentItem = contentItemModel;
@@ -599,7 +591,9 @@ app.directive('albumView', function ($compile, $timeout, $window) {
                     })
 
                     console.log('rearrange after link');
-                    $scope.rearrange();
+                    //$scope.rearrange();
+
+                    $scope.appendRearrageBatch($scope.itemsRoot.children());
                 }
             });
 
