@@ -2,8 +2,8 @@
 	<!-- both album and content items live here -->
 </div>
 
-<div in-view="$inview && loadMoreContentItems()"
-	style="height: {{ 10 + 1 * targetHeight }}px; width: 100%; bottom: 0px; position:absolute;">
+<div in-view="$inview && album && loadMoreContentItems()"
+	style="height: {{ 10 + 1 * targetHeight }}px; width: 100%; bottom: 0px; position:absolute; z-index: -100;">
 </div>
 
 <!-- <div in-view="$inview && loadMoreContentItems()"

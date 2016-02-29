@@ -436,6 +436,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
             function _scaleRow(itemsRow, targetWidth) {
                 console.log('scaling row');
+                console.log(itemsRow);
 
                 targetWidth -= 5;
 
@@ -453,8 +454,8 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     var itemTargetWidth = item.width() * scaleFactor;
                     var itemTargetHeight = item.height() * scaleFactor;
 
-                    itemTargetWidth = Math.round(itemTargetWidth);
-                    itemTargetHeight = Math.round(itemTargetHeight);
+                    //itemTargetWidth = Math.round(itemTargetWidth);
+                    //itemTargetHeight = Math.round(itemTargetHeight);
 
                     item.width(itemTargetWidth);
                     item.height(itemTargetHeight);
@@ -536,15 +537,11 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                 }
 
                 console.log('appendRearrageBatch for ' + items.length);
-
-                if (!(items instanceof Array))
-                {
-                    items = items.toArray();
-                }
+                console.log('items in _buffer: ' + $scope._buffer.length);
 
                 //debugger;
                 // pick up the rest of items from last run
-                items = items.concat($scope._buffer);
+                items = $scope._buffer.concat(items);
 
                 //console.log('appendRearrageBatch2 for ' + items.length);
 
@@ -552,9 +549,15 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     .then(_scaleAsRows(items))
                     .then(function () {
                         // figure out last row items to be subject of repeated rearrange on next call
-
-                        $scope._buffer = [];
+                        
                         var lastRowNum = angular.element(items[items.length - 1]).scope().rowNumber;
+
+                        //console.log('last row number: ' + lastRowNum);
+                        // courner case when batch did not filled even 1 whole line - keep _buffer from previous run
+                        //if (lastRowNum > 1)
+                        {
+                            $scope._buffer = [];
+                        }
 
                         angular.forEach(items, function(item) {
                             if (angular.element(item).scope().rowNumber === lastRowNum) {
@@ -639,17 +642,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     return $scope.appendRearrageBatch(toRender);
                 };
 
-                if (!$scope.album)
-                {
-                    $scope.$watch('album', function (newValue)
-                    {
-                        if (newValue)
-                            loadFunc();
-                    });
-                } else
-                {
-                    return loadFunc();
-                }
+                return loadFunc();
             }
         },
         link: function ($scope, $el, $attr) {
@@ -687,8 +680,11 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     console.log('rearrange after link');
 
                     // render album items
-                    $scope.appendRearrageBatch($scope.itemsRoot.children());
-                        //.then($scope.loadMoreContentItems);
+                    $scope.appendRearrageBatch($scope.itemsRoot.children().toArray())
+                        .then($scope.loadMoreContentItems)
+                        .then($scope.loadMoreContentItems)
+                        .then($scope.loadMoreContentItems)
+                        .then($scope.loadMoreContentItems);
                 }
             });
 
