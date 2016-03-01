@@ -32,11 +32,11 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li data-toggle="collapse" data-target=".navbar-collapse"><a href="#albums"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-            <li data-toggle="collapse" data-target=".navbar-collapse"><a href="#settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+            <li><a href="#albums"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+            <li><a href="#settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
 
             <li class="divider"></li>
-            <li data-toggle="collapse" data-target=".navbar-collapse"><a href="#about"><span class="glyphicon glyphicon-question-sign"></span> About</a></li>
+            <li><a href="#about"><span class="glyphicon glyphicon-question-sign"></span> About</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -45,5 +45,14 @@
     <div id="main">
         <div ng-view></div>
     </div>
+
+    <script type="text/javascript">
+        // http://stackoverflow.com/questions/16877429/twitter-bootstrap-mobile-nav-hide-menu-after-clicking-menu-link
+        $('.navbar-collapse a').click(function (e) {
+            if($('.navbar-toggle').css('display') == 'block' && !$(this).siblings().length){
+                $('.navbar-collapse').collapse('toggle');
+            }
+        });
+    </script>
 </body>
 </html>
