@@ -371,7 +371,9 @@ app.directive('contentItem', function(AlbumsService) {
                     {
                         console.log('[thumb-rerender-ci]');
 
-                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, currentWidth, currentHeight);
+                        var pixelRatio = window.devicePixelRatio || 1;
+
+                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, currentWidth * pixelRatio, currentHeight * pixelRatio);
                         img.attr('src', url);
 
                         $scope.lastRenderedWith = {
