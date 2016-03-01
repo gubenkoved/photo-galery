@@ -1,22 +1,40 @@
-﻿<h2>Settings</h2>
-<div>
-	<label>High quality thumbnails</label>
-	<input type="checkbox" ng-model="config.avoidClientSideResize"></input>
+﻿<div class="container">
 
-	<br />
+	<div class="table-responsive">
+		<table class="table table-striped">
+	    	<tr>
+	    		<td>
+	    			<label>High quality thumbnails</label>
+    			</td>
+	    		<td>
+	    			<input type="checkbox" ng-model="config.avoidClientSideResize"></input>
+	    		</td>
+	    	</tr>
 
-	<label>Spacing</label>
-	<input type="number" min="0" max="10" required 
-		ng-model="config['albumView.spacing']"> </input>
+	    	<tr>
+	    		<td>
+	    			<label>Desired item height</label>
+    			</td>
+	    		<td>
+	    			<input type="number" min="50" max="1000" required
+						ng-model="config['albumView.targetHeight']"> </input>
+	    		</td>
+	    	</tr>
 
-	<br />
+	    	<tr>
+	    		<td>
+	    			<label>Spacing</label>
+	    		</td>
+	    		<td>
+	    			<input type="number" min="0" max="10" required 
+						ng-model="config['albumView.spacing']"> </input>
+	    		</td>
+	    	</tr>
+	  	</table>
+	</div>
 
-	<label>Desired item height</label>
-	<input type="number" min="50" max="1000" required
-		ng-model="config['albumView.targetHeight']"> </input>
-
-	<br />
-
-	<button ng-click="restoreDefault()">Restore default</button>
-	<button ng-click="saveConfig()">Save</button>
+	<div>
+		<button class="btn btn-danger" ng-click="restoreDefault()">Restore default</button>
+		<button class="btn btn-primary " ng-click="saveConfig()">Save</button>
+	</div>
 </div>

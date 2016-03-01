@@ -207,7 +207,9 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 /* CONTROLLERS */
 
 app.controller('AlbumsController',
-    function($scope, $routeParams, $route, $location, AlbumsService, ConfigService) {
+    function($rootScope, $scope, $routeParams, $route, $location, AlbumsService, ConfigService) {
+
+        $rootScope.pageTitle = "Loading...";
 
         //debugger;
         $scope.spacing = ConfigService.get()['albumView.spacing'];
@@ -233,6 +235,7 @@ app.controller('AlbumsController',
                     $route.updateParams(pRoute);
 
                     $scope.currentAlbum = albumModel
+                    $rootScope.pageTitle = albumModel.name;
                 } else {
                     console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
                 }
@@ -255,11 +258,15 @@ app.controller('AlbumsController',
     }
 );
 
-app.controller('AboutController', function($scope, ConfigService) {
+app.controller('AboutController', function($rootScope, $scope, ConfigService) {
+    $rootScope.pageTitle = 'About';
+
     $scope.config = ConfigService.get();
 });
 
-app.controller('SettingsController', function($scope, ConfigService) {
+app.controller('SettingsController', function($rootScope, $scope, ConfigService) {
+    $rootScope.pageTitle = 'Settings';
+
     $scope.config = ConfigService.get();
 
     $scope.saveConfig = function ()
