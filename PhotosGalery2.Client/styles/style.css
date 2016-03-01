@@ -11,6 +11,7 @@ body
 div[album-view]
 {
   position: relative;
+  margin-bottom: 24px;
 }
 
 div[content-item]
