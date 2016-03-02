@@ -52,18 +52,20 @@ div[album-item]
 
 .album-item-content a
 {
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 	font-family: 'Segoe UI';
-	background-color: rgba(255,255,255,0.5);
+	background-color: rgba(0,0,0,0.3);
 	width: 100%;
 	display: block;
-	padding: 10px;
+	padding: 6px;
 	bottom: 0px;
 	position: absolute;
 	box-sizing: border-box;
 	/* height: 100%; */
 	font-size: large;
-	border-top: solid 1px rgba(255, 255, 255, 0.2);
+	border-top: solid 2px rgba(0, 0, 0, 0.3);
 	/* font-weight: 100; */
+	color: #EEE;
 }
 
 /* BOOTSTRAP */
