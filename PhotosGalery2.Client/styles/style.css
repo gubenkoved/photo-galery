@@ -50,7 +50,7 @@ div[album-item]
 	object-fit: cover;
 }
 
-.album-item-content a
+.album-item-content a, .album-item-content a:hover
 {
 	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 	font-family: 'Segoe UI';
@@ -66,6 +66,7 @@ div[album-item]
 	border-top: solid 2px rgba(0, 0, 0, 0.3);
 	/* font-weight: 100; */
 	color: #EEE;
+  text-decoration: none;
 }
 
 /* BOOTSTRAP */
