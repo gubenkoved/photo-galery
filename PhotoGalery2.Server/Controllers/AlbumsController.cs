@@ -34,7 +34,9 @@ namespace PhotoGalery2.Server.Controllers
 
             var rootAlbum = metadataProvider.GetRoot();
 
-            return new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(rootAlbum);
+            var rootAlbumVM = new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(rootAlbum);
+
+            return DefaultSortAlbum(rootAlbumVM);
         }
 
         /// <summary>
@@ -57,7 +59,9 @@ namespace PhotoGalery2.Server.Controllers
                     $"album with id '{albumPath}' was not found");
             }
 
-            return new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(album);
+            var extendedAlbumVM = new AlbumViewModelExtended(_albumItemsPathProvider).FillBy2(album);
+
+            return DefaultSortAlbum(extendedAlbumVM);
         }
 
         /// <summary>
@@ -175,6 +179,18 @@ namespace PhotoGalery2.Server.Controllers
             }
 
             return _albumItemsPathProvider.GetAlbumUri(album);
+        }
+
+        /// <summary>
+        /// Sorts album/content items with default order.
+        /// Returns the same album reference - for convenience of chaining.
+        /// </summary>
+        private AlbumViewModelExtended DefaultSortAlbum(AlbumViewModelExtended album)
+        {
+            album.AlbumItems = album.AlbumItems.OrderBy(x => x.Name).ToList();
+            album.ContentItems = album.ContentItems.OrderBy(x => x.Name).ToList();
+
+            return album;
         }
     }
 }

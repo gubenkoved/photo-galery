@@ -121,7 +121,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
             contentItems: []
         };
 
-        for (var i = apiResult.AlbumItems.length - 1; i >= 0; i--) {
+        for (var i = 0; i < apiResult.AlbumItems.length; i++) {
             var ai = apiResult.AlbumItems[i];
             
             r.albumItems.push({
@@ -131,7 +131,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
             });
         }
 
-        for (var i = apiResult.ContentItems.length - 1; i >= 0; i--) {
+        for (var i = 0; i < apiResult.ContentItems.length; i++) {
             var ci = apiResult.ContentItems[i];
 
             r.contentItems.push({
@@ -593,10 +593,10 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     });
             }
 
-            $scope.lastContentItemIndex = -1;
+            $scope.lastContentItemIndex = 0;
             $scope.getNewContentItemsBatchToRender = function ()
             {
-                var start = $scope.lastContentItemIndex + 1;
+                var start = $scope.lastContentItemIndex;
                 var to = start + $scope.lazyLoadingBatchSize;
                 $scope.lastContentItemIndex = to;
 
@@ -604,6 +604,9 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
 
                 angular.forEach($scope.album.contentItems.slice(start, to), function (contentItemModel)
                 {
+                    //debugger;
+                    //console.log('render CI: ' + contentItemModel.name);
+
                     var contentItemScope = $scope.$new();
                     contentItemScope.contentItem = contentItemModel;
                     contentItemScope.aspect = contentItemModel.origWidth / contentItemModel.origHeight;
