@@ -6,10 +6,12 @@
     
     <script src="scripts/pace.min.js"></script>
     <script src="scripts/jquery-2.2.1.min.js"> </script>
+    <script src="scripts/jquery.bootstrap-autohidingnavbar.min.js"></script>
     <script src="ng/angular.js"> </script>
     <script src="ng/angular-route.js"> </script>
     <script src="ng/angular-local-storage.js"> </script>
     <script src="ng/angular-inview.js"> </script>
+
     <script src="app/app.js"> </script>
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 
@@ -53,6 +55,11 @@
             if($('.navbar-toggle').css('display') == 'block' && !$(this).siblings().length){
                 $('.navbar-collapse').collapse('toggle');
             }
+        });
+
+        //https://github.com/istvan-ujjmeszaros/bootstrap-autohidingnavbar
+        $(".navbar-fixed-top").autoHidingNavbar({
+            //hideOffset: 1000
         });
     </script>
 </body>
