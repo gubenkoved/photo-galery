@@ -42,8 +42,8 @@ app.constant('defaultConfig', {
     ver: '1.0.0.0',
 
     desiredThumbSize: {
-        width: 300,
-        height: 300
+        width: 500,
+        height: 500
     },
 
     // this improves image quality by requesting exact size from server
@@ -148,9 +148,11 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 
     service.getSpecificSizeThumbUrl = function (thumbUrl, width, height, keepSourceAspectRatio)
     {
-        // if undefined or 0 was requested - return some super small thumb to easier troubleshooting
-        width = width || 13;
-        height = height || 13;
+        var pixelRatio = window.devicePixelRatio || 1;
+
+        // if undefined or 0 was requested - use defaults from config
+        width = width || pixelRatio * ConfigService.get().desiredThumbSize.width;
+        height = height || pixelRatio * ConfigService.get().desiredThumbSize.height;
 
         if (ConfigService.get().avoidClientSideResize)
         {
@@ -413,8 +415,8 @@ app.directive('albumItem', function(AlbumsService) {
                 {
                     if ($scope.item.thumbUrl)
                     {
-                        var s = Math.max(img.width(), img.height())
-                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, s, s, true);
+                        // keep source aspect
+                        var url = AlbumsService.getSpecificSizeThumbUrl($scope.item.thumbUrl, null, null, true);
 
                         img.attr('src', url);
                     }
@@ -480,7 +482,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                 angular.forEach(items, function(item) {
                     item = angular.element(item);
 
-                    var itemAspect = angular.element(item).scope().aspect || 1;
+                    var itemAspect = angular.element(item).scope().aspect || 1.3333;
 
                     item.css({
                         height: $scope.targetHeight + 'px',
