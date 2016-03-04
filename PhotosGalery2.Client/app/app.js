@@ -464,7 +464,11 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     var itemTargetHeight = item.height() * scaleFactor;
 
                     //itemTargetWidth = Math.round(itemTargetWidth);
-                    //itemTargetHeight = Math.round(itemTargetHeight);
+
+                    // this will fix align items by height that could
+                    // be little messed up due to floating point height
+                    // I don't see such trouble for float width however
+                    itemTargetHeight = Math.round(itemTargetHeight);
 
                     item.width(itemTargetWidth);
                     item.height(itemTargetHeight);
