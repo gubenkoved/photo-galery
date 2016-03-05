@@ -254,6 +254,11 @@ app.controller('AlbumsController',
             $scope.getAlbum(album.url);
         }
 
+        $scope.onContentItemClick = function(item) {
+            console.log('handle onContentItemClick for');
+            console.log(item);
+        }
+
         $scope.debug = function(o) {
             console.log(o);
         }
@@ -349,11 +354,12 @@ app.directive('spinner2', function() {
 app.directive('contentItem', function(AlbumsService) {
     return {
         scope: {
-            item: '='
+            item: '=',
+            onClick: '&'
         },
         //templateUrl: '/app/directives/contentItem.html',
         template:
-            '<div item-name="{{ item.name }}" style="width: 100%; height: 100%">' +
+            '<div item-name="{{ item.name }}" ng-click="onClick()(item)" style="width: 100%; height: 100%">' +
                 '<img spinner2 />' +
             '</div>',
         //require: '^ablumView'
@@ -435,6 +441,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             spacing: '@',
             targetHeight: '@',
             onAlbumClick: '&',
+            onContentItemClick: '&',
             lazyLoadingBatchSize: '@'
         },
         restrict: 'A',
@@ -625,7 +632,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     });
                     contentItemWrapper.addClass('item-wrapper');
 
-                    var contentItemDirective = angular.element('<div content-item item="contentItem"></div>');
+                    var contentItemDirective = angular.element('<div content-item item="contentItem" on-click="onContentItemClick()(contentItem)"></div>');
                     
                     contentItemWrapper.append(contentItemDirective);
                     $scope.itemsRoot.append(contentItemWrapper);
