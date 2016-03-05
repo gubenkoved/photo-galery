@@ -257,6 +257,23 @@ app.controller('AlbumsController',
         $scope.onContentItemClick = function(item) {
             console.log('handle onContentItemClick for');
             console.log(item);
+
+            // open fullScreenView
+            //item.url
+
+            $scope.fsvCurrentImageUrl = item.url;
+
+            $('#full-screen-view').show();
+        }
+
+        $scope.fsvNavigateLeft = function ()
+        {
+            console.log('fsvNavigateLeft');
+        }
+
+        $scope.fsvNavigateRight = function ()
+        {
+            console.log('fsvNavigateRight');
         }
 
         $scope.debug = function(o) {
@@ -325,6 +342,8 @@ app.directive('spinner2', function() {
         },
         link: function ($scope, $el, $attrs)
         {
+            var settings = $attrs['spinner2'];
+
             $scope.spinner = angular.element('<div class="spinner">\
   <div class="rect1"></div>\
   <div class="rect2"></div>\
@@ -333,6 +352,13 @@ app.directive('spinner2', function() {
   <div class="rect5"></div>\
 </div>');
             $scope.spinner.attr('style', 'position: absolute; left: 0; top: 0; right: 0; bottom: 0; margin: auto;');
+
+            if (settings)
+            {
+                $scope.spinner.children().css({
+                    'background-color': settings
+                });
+            }
 
              $el.on('load', function() {
                 $el.show();
@@ -751,6 +777,10 @@ app.directive('fullScreenView', function() {
         },
         templateUrl: '/app/directives/fullScreenView.html',
         link: function($scope, $el, $attrs) {
+            $scope.onImageClick = function ()
+            {
+                $el.hide();
+            }
         }
     };
 });

@@ -6,4 +6,11 @@
     <div album-view album="currentAlbum" on-album-click="onAlbumClick" on-content-item-click="onContentItemClick"
     	spacing="{{ spacing }}" target-height="{{ targetHeight }}">
     </div>
+
+    <div id="full-screen-view" full-screen-view image-url="{{ fsvCurrentImageUrl }}" on-left-navigation-click="fsvNavigateLeft" on-right-navigation-click="fsvNavigateRight">
+	</div>
+
+	<script type="text/javascript">
+		$("#full-screen-view").hide();
+	</script>
 </div>
