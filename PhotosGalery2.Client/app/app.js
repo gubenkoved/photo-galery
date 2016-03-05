@@ -303,9 +303,9 @@ app.controller('TestController', ['$scope', function($scope){
         ]
     }
 
-    $scope.testFunc = function ()
+    $scope.testFunc = function (x)
     {
-        console.log('test func!');
+        console.log('test func: ' + x);
     }
 
     //$scope.
@@ -734,6 +734,19 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
         }
     };
 })
+
+app.directive('fullScreenView', function() {
+    return {
+        scope: {
+            imageUrl: '@',
+            onLeftNavigationClick: '&',
+            onRightNavigationClick: '&'
+        },
+        templateUrl: '/app/directives/fullScreenView.html',
+        link: function($scope, $el, $attrs) {
+        }
+    };
+});
 
 app.directive('test', function() {
     return {

@@ -1,0 +1,86 @@
+﻿<style type="text/css">
+	.full-screen-view-L0
+	{
+		position: fixed;
+		top:0px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+		background: rgba(0,0,0, 0.9);
+		z-index: 300;
+	}
+
+	.full-screen-view-LI
+	{
+		background-color: rgba(255,255,255, 0.1);
+		margin: 10px 20px;
+		/*height: 100%;*/
+		position: absolute;
+
+		top:0px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+		z-index: 3;
+	}
+
+	.full-screen-view-IC
+	{
+		height: 100%;      /* equals max image height */
+	    width: 100%;
+	    white-space: nowrap;
+	    text-align: center;
+	    background-color: rgba(255,255,255, 0.1);
+	}
+
+	.full-screen-view-IC img
+	{
+		background: #3A6F9A;
+	    vertical-align: middle;
+	    max-height: 100%;
+	    max-width: 100%;
+	    margin-left: -5px;
+	}
+
+	.full-screen-view-helper {
+	    display: inline-block;
+	    height: 100%;
+	    vertical-align: middle;
+	}
+
+	.full-screen-view-LL
+	{
+		background-color: rgba(0,255,0, 0.1);
+		position: absolute;
+		top:0px;
+		bottom: 0px;
+		left: 0px;
+		width: 30%;
+	}
+
+	.full-screen-view-LR
+	{
+		background-color: rgba(255,0,0, 0.1);
+		position: absolute;
+		top:0px;
+		bottom: 0px;
+		right: 0px;
+		width: 30%;
+	}
+</style>
+
+
+<div class="full-screen-view-L0">
+	<div class="full-screen-view-LI">
+		<div class="full-screen-view-LL" ng-click="onLeftNavigationClick()()">
+		</div>
+
+		<div class="full-screen-view-IC">
+		    <span class="full-screen-view-helper"></span>
+		    <img ng-src="{{imageUrl}}" />
+		</div>
+
+		<div class="full-screen-view-LR" ng-click="onRightNavigationClick()()">
+		</div>
+	</div>
+</div>
