@@ -264,6 +264,17 @@ app.controller('AlbumsController',
             $scope.fsvCurrentImageUrl = item.url;
 
             $('#full-screen-view').show();
+            $('.navbar-fixed-top').hide();
+            
+            //$('body').addClass('noscroll');
+            //$('html').addClass('noscroll');
+        }
+
+        $scope.fsvOnClose = function(item) {
+            $('.navbar-fixed-top').show();
+
+            //$('body').removeClass('noscroll');
+            //$('html').removeClass('noscroll');
         }
 
         $scope.fsvNavigateLeft = function ()
@@ -772,6 +783,7 @@ app.directive('fullScreenView', function() {
     return {
         scope: {
             imageUrl: '@',
+            afterClose: '&',
             onLeftNavigationClick: '&',
             onRightNavigationClick: '&'
         },
@@ -780,6 +792,7 @@ app.directive('fullScreenView', function() {
             $scope.onImageClick = function ()
             {
                 $el.hide();
+                $scope.afterClose()();
             }
         }
     };

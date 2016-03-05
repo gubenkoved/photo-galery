@@ -7,7 +7,7 @@
     	spacing="{{ spacing }}" target-height="{{ targetHeight }}">
     </div>
 
-    <div id="full-screen-view" full-screen-view image-url="{{ fsvCurrentImageUrl }}" on-left-navigation-click="fsvNavigateLeft" on-right-navigation-click="fsvNavigateRight">
+    <div id="full-screen-view" full-screen-view image-url="{{ fsvCurrentImageUrl }}" on-left-navigation-click="fsvNavigateLeft" on-right-navigation-click="fsvNavigateRight" after-close="fsvOnClose">
 	</div>
 
 	<script type="text/javascript">
