@@ -258,17 +258,16 @@ app.controller('AlbumsController',
             console.log('handle onContentItemClick for');
             console.log(item);
 
-            // open fullScreenView
-            //item.url
+            // temporary disable auto menu hide because
+            // we are going to manipulate with scroll position
+            // so that it will cause undesired menu rolling back and forth
+            $('.navbar-fixed-top').autoHidingNavbar('setDisableAutohide', true);
 
             $scope.fsvCurrentImageUrl = item.url;
+            $scope.scrollTopValueBeforeNoScroll = $('body').scrollTop();
 
             $('#full-screen-view').show();
             $('.navbar-fixed-top').hide();
-
-            $scope.scrollTopValueBeforeNoScroll = $('body').scrollTop();
-
-            console.log('scroll top was: ' + $scope.scrollTopValueBeforeNoScroll);
             
             $('body').addClass('noscroll');
             $('body').css({
@@ -288,9 +287,11 @@ app.controller('AlbumsController',
                     'margin-top': 0
                 });
 
+                // restore original view position
                 $('body').scrollTop( $scope.scrollTopValueBeforeNoScroll );
 
-                console.log('scroll top now: ' + $('body').scrollTop());
+                // enable auto menu hide back
+                $('.navbar-fixed-top').autoHidingNavbar('setDisableAutohide', false);
             });
         }
 
