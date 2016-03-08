@@ -73,12 +73,7 @@ div[album-item]
 {
   position: fixed;
   overflow: hidden;
-}
-
-.noscroll
-{
   height: 100%;
-  overflow: hidden;
 }
 
 /* BOOTSTRAP */

@@ -209,7 +209,7 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 /* CONTROLLERS */
 
 app.controller('AlbumsController',
-    function($rootScope, $scope, $routeParams, $route, $location, AlbumsService, ConfigService) {
+    function($rootScope, $scope, $routeParams, $route, $location, $timeout, AlbumsService, ConfigService) {
 
         $rootScope.pageTitle = "Loading...";
 
@@ -265,16 +265,33 @@ app.controller('AlbumsController',
 
             $('#full-screen-view').show();
             $('.navbar-fixed-top').hide();
+
+            $scope.scrollTopValueBeforeNoScroll = $('body').scrollTop();
+
+            console.log('scroll top was: ' + $scope.scrollTopValueBeforeNoScroll);
             
-            //$('body').addClass('noscroll');
-            //$('html').addClass('noscroll');
+            $('body').addClass('noscroll');
+            $('body').css({
+                'margin-top': -1 * $scope.scrollTopValueBeforeNoScroll + 'px'
+            });
         }
 
         $scope.fsvOnClose = function(item) {
             $('.navbar-fixed-top').show();
 
-            //$('body').removeClass('noscroll');
-            //$('html').removeClass('noscroll');
+            $('body').removeClass('noscroll');
+
+            console.log('restore scroll top to: ' + $scope.scrollTopValueBeforeNoScroll);
+
+            $timeout(function(){
+                $('body').css({
+                    'margin-top': 0
+                });
+
+                $('body').scrollTop( $scope.scrollTopValueBeforeNoScroll );
+
+                console.log('scroll top now: ' + $('body').scrollTop());
+            });
         }
 
         $scope.fsvNavigateLeft = function ()
