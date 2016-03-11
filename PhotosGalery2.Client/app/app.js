@@ -38,7 +38,7 @@ app.config(function($httpProvider) {
 });
 
 app.constant('defaultConfig', {
-    apiRoot: 'http://192.168.1.2:59999/api',
+    apiRoot: 'http://gubenkoved.noip.me:59999/api',
     ver: '1.0.0.0',
 
     desiredThumbSize: {
