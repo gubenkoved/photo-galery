@@ -239,7 +239,7 @@ app.controller('AlbumsController',
                     $scope.currentAlbum = albumModel
                     $rootScope.pageTitle = albumModel.name;
                 } else {
-                    console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
+                    //console.log(`discarding result of request with id ${rid} since waiting for ${$scope.waitingForRequestId}`);
                 }
             });
         }
