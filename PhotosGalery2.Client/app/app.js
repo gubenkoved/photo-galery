@@ -383,8 +383,6 @@ app.directive('egKeyPressed', function () {
         
             var expr = attrs['egKeyPressed'];
 
-            debugger;
-
             var regexp = /(\d+) ?-> ?(.+)/;
 
             if (!regexp.test(expr))
@@ -400,20 +398,22 @@ app.directive('egKeyPressed', function () {
 
             console.log('wait for ' + keyCode + ' key, then call \'' + exprToCall + '\'');
 
-            $(document).keydown(function (event) {
-                console.log('i\'ve called');
-                console.log(event);
-                //debugger;
+            var handler = function (event) {
                 if((event.which || event.keyCode) === keyCode) {
-                    //debugger;
                     console.log('calling this: ' + exprToCall);
 
                     scope.$apply(function (){
                         scope.$eval(exprToCall);
                     });
 
-                    //event.preventDefault();
+                    event.preventDefault();
                 }
+            };
+
+            $(document).bind('keydown', handler);
+
+            scope.$on("$destroy", function handleDestroy() {
+                $(document).unbind('keydown', handler);
             });
         }
     };
