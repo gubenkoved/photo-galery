@@ -30,7 +30,7 @@ div[album-item]
 {
 	text-align: center;
 	background-color: #EEE;
-	border: 1px solid rgba(0,0,0, 0.5);
+	/* border: 1px solid rgba(0,0,0, 0.5); */
 }
 
 .album-item-content 
