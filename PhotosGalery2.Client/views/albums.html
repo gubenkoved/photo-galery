@@ -7,10 +7,25 @@
     	spacing="{{ spacing }}" target-height="{{ targetHeight }}">
     </div>
 
-    <div id="full-screen-view" full-screen-view image-url="{{ fsvCurrentImageUrl }}" on-left-navigation-click="fsvNavigateLeft" on-right-navigation-click="fsvNavigateRight" after-close="fsvOnClose">
+    <div id="full-screen-view"
+        full-screen-view image-url="{{ currentAlbum.contentItems[fsvCurrentImageIndex].url }}"
+        on-left-navigation-click="fsvNavigateLeft"
+        on-right-navigation-click="fsvNavigateRight"
+        after-close="fsvOnClose">
 	</div>
+
+    <div eg-key-pressed="37 -> fsvNavigateLeft()"></div>
+    <div eg-key-pressed="39 -> fsvNavigateRight()"></div>
 
 	<script type="text/javascript">
 		$("#full-screen-view").hide();
+
+        // $( document ).keydown(function() {
+        //   console.log( "Handler for .keydown() called." );
+        // });
+
+        // $(document).keydown(function (event) {
+        //         console.log('i\'ve called2');
+        //     });
 	</script>
 </div>

@@ -263,7 +263,7 @@ app.controller('AlbumsController',
             // so that it will cause undesired menu rolling back and forth
             $('.navbar-fixed-top').autoHidingNavbar('setDisableAutohide', true);
 
-            $scope.fsvCurrentImageUrl = item.url;
+            $scope.fsvCurrentImageIndex = $scope.currentAlbum.contentItems.indexOf(item);
             $scope.scrollTopValueBeforeNoScroll = $('body').scrollTop();
 
             $('#full-screen-view').show();
@@ -298,11 +298,21 @@ app.controller('AlbumsController',
         $scope.fsvNavigateLeft = function ()
         {
             console.log('fsvNavigateLeft');
+
+            if ($scope.fsvCurrentImageIndex > 0)
+            {
+                $scope.fsvCurrentImageIndex -= 1;
+            }
         }
 
         $scope.fsvNavigateRight = function ()
         {
             console.log('fsvNavigateRight');
+
+            if ($scope.fsvCurrentImageIndex < $scope.currentAlbum.contentItems.length - 1)
+            {
+                $scope.fsvCurrentImageIndex += 1;
+            }
         }
 
         $scope.debug = function(o) {
@@ -363,6 +373,51 @@ app.controller('TestController', ['$scope', function($scope){
 }]);
 
 /* DIRECTIVES */
+
+// syntax <any eg-keypressed='{int} -> {angularExpression}' />
+// bings to element keyDown and keyPress event and if specified key is pressed calls specified expression
+app.directive('egKeyPressed', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+        
+            var expr = attrs['egKeyPressed'];
+
+            debugger;
+
+            var regexp = /(\d+) ?-> ?(.+)/;
+
+            if (!regexp.test(expr))
+            {
+                console.log('invalid eg-keypressed expression syntax: ' + expr);
+                return;
+            }
+
+            var regexpResult = regexp.exec(expr);
+
+            var keyCode = parseInt(regexpResult[1]);
+            var exprToCall = regexpResult[2];
+
+            console.log('wait for ' + keyCode + ' key, then call \'' + exprToCall + '\'');
+
+            $(document).keydown(function (event) {
+                console.log('i\'ve called');
+                console.log(event);
+                //debugger;
+                if((event.which || event.keyCode) === keyCode) {
+                    //debugger;
+                    console.log('calling this: ' + exprToCall);
+
+                    scope.$apply(function (){
+                        scope.$eval(exprToCall);
+                    });
+
+                    //event.preventDefault();
+                }
+            });
+        }
+    };
+});
 
 app.directive('spinner2', function() {
     return {
