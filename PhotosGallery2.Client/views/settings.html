@@ -1,40 +1,42 @@
-﻿<div class="container">
+﻿<!-- <div class="jumbotron"> -->
+	<div class="container">
 
-	<div class="table-responsive">
-		<table class="table table-striped">
-	    	<tr>
-	    		<td>
-	    			<label>High quality thumbnails</label>
-    			</td>
-	    		<td>
-	    			<input type="checkbox" ng-model="config.avoidClientSideResize"></input>
-	    		</td>
-	    	</tr>
+		<div class="table-responsive">
+			<table class="table">
+		    	<tr>
+		    		<td>
+		    			<label>High quality thumbnails</label>
+	    			</td>
+		    		<td>
+		    			<input type="checkbox" ng-model="config.avoidClientSideResize"></input>
+		    		</td>
+		    	</tr>
 
-	    	<tr>
-	    		<td>
-	    			<label>Desired item height</label>
-    			</td>
-	    		<td>
-	    			<input type="number" min="50" max="1000" required
-						ng-model="config['albumView.targetHeight']"> </input>
-	    		</td>
-	    	</tr>
+		    	<tr>
+		    		<td>
+		    			<label>Desired item height</label>
+	    			</td>
+		    		<td>
+		    			<input type="number" min="50" max="1000" required
+							ng-model="config['albumView.targetHeight']"> </input>
+		    		</td>
+		    	</tr>
 
-	    	<tr>
-	    		<td>
-	    			<label>Spacing</label>
-	    		</td>
-	    		<td>
-	    			<input type="number" min="0" max="10" required 
-						ng-model="config['albumView.spacing']"> </input>
-	    		</td>
-	    	</tr>
-	  	</table>
+		    	<tr>
+		    		<td>
+		    			<label>Spacing</label>
+		    		</td>
+		    		<td>
+		    			<input type="number" min="0" max="10" required 
+							ng-model="config['albumView.spacing']"> </input>
+		    		</td>
+		    	</tr>
+		  	</table>
+		</div>
+
+		<div>
+			<button class="btn btn-danger" ng-click="restoreDefault()">Restore default</button>
+			<button class="btn btn-primary " ng-click="saveConfig()">Save</button>
+		</div>
 	</div>
-
-	<div>
-		<button class="btn btn-danger" ng-click="restoreDefault()">Restore default</button>
-		<button class="btn btn-primary " ng-click="saveConfig()">Save</button>
-	</div>
-</div>
+<!-- </div> -->
