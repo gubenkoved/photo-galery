@@ -13,6 +13,7 @@ namespace PhotoGalery2.Server.Common
     public class AuthMessageHandler : DelegatingHandler
     {
         public const string AuthenticationType = "EGToken";
+        public const string QueryStringAuthHolderKey = "$auth";
 
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -23,19 +24,35 @@ namespace PhotoGalery2.Server.Common
                     string authToken = request.Headers.Authorization.Parameter;
 
                     // validate Token here
+                    HandleAuthData(request, authToken);
+                }
+            } else // try query string parameters to find token
+            {
+                var authTokenFound = request.GetQueryNameValuePairs()
+                    .Any(k => k.Key == QueryStringAuthHolderKey);
 
-                    var identity = new ClaimsIdentity(AuthenticationType);
+                if (authTokenFound)
+                {
+                    var tokenKvp = request.GetQueryNameValuePairs()
+                        .First(k => k.Key == QueryStringAuthHolderKey);
 
-                    var principal = new ClaimsPrincipal(identity);
-
-                    request.GetRequestContext().Principal = principal;
-                    //SetPrincipal(principal);
+                    HandleAuthData(request, tokenKvp.Value);
                 }
             }
 
             var innerResult = await base.SendAsync(request, cancellationToken);
 
             return innerResult;
+        }
+
+        private void HandleAuthData(HttpRequestMessage request, string token)
+        {
+            var identity = new ClaimsIdentity(AuthenticationType);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            request.GetRequestContext().Principal = principal;
+            //SetPrincipal(principal);
         }
 
         private static void SetPrincipal(IPrincipal principal)
