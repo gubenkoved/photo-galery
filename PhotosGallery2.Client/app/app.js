@@ -39,6 +39,7 @@ app.config(['$routeProvider',
 
 app.config(function($httpProvider) {
     $httpProvider.interceptors.push('http404Interceptor');
+    $httpProvider.interceptors.push('authInterceptor');
 });
 
 app.constant('defaultConfig', {
@@ -67,8 +68,37 @@ app.factory('http404Interceptor', function($q, $window) {
 
             if (rejection.status == 404) {
                 //console.log(rejection.config);
-
                 $window.location = './#/404';
+            }
+
+            return $q.reject(rejection);
+        }
+    };
+});
+
+app.factory('authInterceptor', function($q, $window, $location, $injector) {
+    return {
+        'request': function(config) {
+          
+            //console.log(config.url);
+
+            // call injector manually to resolve circular dependency
+            var AuthService = $injector.get('AuthService');
+
+            if (AuthService.getAuthData() !== null)
+            {
+                var authData = AuthService.getAuthData();
+                config.headers.authorization = authData.authType + ' ' + authData.token;
+            }
+
+            return config;
+        },
+
+        'responseError': function(rejection) {
+            
+            if (rejection.status == 401) {
+                var returnTo = $location.path();
+                $window.location = './#/login?returnTo=' + returnTo;
             }
 
             return $q.reject(rejection);
@@ -94,6 +124,42 @@ app.service('ConfigService', function (defaultConfig, localStorageService) {
     service.restoreDefault = function(config)
     {
         localStorageService.set('config', angular.extend({}, defaultConfig));
+    }
+
+    return service;
+});
+
+app.service('AuthService', function ($http, ConfigService, localStorageService) {
+    var service = {}
+
+    service.authenticate = function(username, password)
+    {
+        var authRequest = {
+            username: username,
+            password: password
+        }
+
+        return $http.post(ConfigService.get().apiRoot + '/user/authenticate', authRequest)
+            .then(function(response) {
+                // auth - OK > save
+
+                var token = response.data.AuthToken;
+                var authType = response.data.AuthType;
+
+                var authData = {
+                    token: token,
+                    authType: authType
+                };
+
+                console.dir(response.data);
+
+                localStorageService.set('auth', authData);
+            });
+    }
+
+    service.getAuthData = function()
+    {
+        return localStorageService.get('auth');
     }
 
     return service;
@@ -212,8 +278,27 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 
 /* CONTROLLERS */
 
-app.controller('LoginController', function($rootScope, $scope, ConfigService) {
+app.controller('LoginController', function($rootScope, $scope, $routeParams, $window, ConfigService, AuthService) {
     $rootScope.hideNavigation = true;
+
+    $scope.authenticate = function(username, password)
+    {
+        AuthService.authenticate($scope.auth.username, $scope.auth.password)
+            .then(function (authResult)
+            {
+                var returnTo = $routeParams.returnTo;
+
+                console.log('auth success');
+                console.log(returnTo);
+
+                $window.location = './#' + returnTo;
+            }, function (authError)
+            {
+                console.log('auth error');
+            });
+
+        // redirect to orig route (if any)
+    }
 });
 
 app.controller('AlbumsController',
