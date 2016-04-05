@@ -60,6 +60,19 @@ app.constant('defaultConfig', {
     'albumView.targetHeight': 200
 });
 
+/* COMMON FUNCTIONS */
+
+function _updateQueryStringParameter(uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+    }
+    else {
+        return uri + separator + key + "=" + value;
+    }
+}
+
 /* INTERCEPTORS */
 
 app.factory('http404Interceptor', function($q, $window) {
@@ -162,22 +175,28 @@ app.service('AuthService', function ($http, ConfigService, localStorageService) 
         return localStorageService.get('auth');
     }
 
+    service.isAuthenticated = function()
+    {
+        return service.getAuthData !== null;
+    }
+
+    service.addAuthTokenAsQueryParameter = function (url)
+    {
+        var authData = service.getAuthData();
+
+        if (authData && authData.token)
+        {
+            return _updateQueryStringParameter(url, "$auth", authData.token);
+        }
+
+        return url;
+    }
+
     return service;
 });
 
-app.service('AlbumsService', function($http, ConfigService, $q) {
+app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
     var service = {};
-
-    function _updateQueryStringParameter(uri, key, value) {
-      var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-      var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-      if (uri.match(re)) {
-        return uri.replace(re, '$1' + key + "=" + value + '$2');
-      }
-      else {
-        return uri + separator + key + "=" + value;
-      }
-    }
 
     function mapAlbumsResponse(apiResult) {
         var r = {
@@ -216,6 +235,22 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
         return r;
     }
 
+    function addAuthTokenToThumbUrls(albumModel) {
+        angular.forEach(albumModel.albumItems, function(item) {
+            if (item.thumbUrl)
+            {
+                item.thumbUrl = AuthService.addAuthTokenAsQueryParameter(item.thumbUrl);
+            }
+        });
+
+        angular.forEach(albumModel.contentItems, function(item) {
+            if (item.thumbUrl)
+            {
+                item.thumbUrl = AuthService.addAuthTokenAsQueryParameter(item.thumbUrl);
+            }
+        });
+    }
+
     service.getSpecificSizeThumbUrl = function (thumbUrl, width, height, keepSourceAspectRatio)
     {
         var pixelRatio = window.devicePixelRatio || 1;
@@ -246,13 +281,17 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
         if (!albumUrl) {
             return $http.get(ConfigService.get().apiRoot + '/albums')
                 .then(function(response) {
-                    return mapAlbumsResponse(response.data);
+                    var model = mapAlbumsResponse(response.data);
+                    addAuthTokenToThumbUrls(model);
+                    return model;
                 });
         }
 
         return $http.get(albumUrl)
             .then(function(response) {
-                return mapAlbumsResponse(response.data);
+                var model = mapAlbumsResponse(response.data);
+                    addAuthTokenToThumbUrls(model);
+                    return model;
             });
     }
 
