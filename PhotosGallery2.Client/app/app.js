@@ -3,6 +3,10 @@ var app = angular.module('app', ['ngRoute', 'LocalStorageModule', 'angular-invie
 app.config(['$routeProvider',
     function($routeProvider) {
         $routeProvider.
+        when('/login', {
+            templateUrl: 'views/login.html',
+            controller: 'LoginController'
+        }).
         when('/albums/:albumPath?', {
             templateUrl: 'views/albums.html',
             controller: 'AlbumsController'
@@ -207,6 +211,10 @@ app.service('AlbumsService', function($http, ConfigService, $q) {
 });
 
 /* CONTROLLERS */
+
+app.controller('LoginController', function($rootScope, $scope, ConfigService) {
+    $rootScope.hideNavigation = true;
+});
 
 app.controller('AlbumsController',
     function($rootScope, $scope, $routeParams, $route, $location, $timeout, AlbumsService, ConfigService) {
