@@ -186,8 +186,12 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Common\AuthMessageHandler.cs" />
     <Compile Include="Common\DefaultAlbumItemsPathProvider.cs" />
     <Compile Include="Common\AlbumItemsPathProvider.cs" />
+    <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Models\AuthenticationResponse.cs" />
+    <Compile Include="Models\AuthenticationRequest.cs" />
     <Compile Include="Models\ViewModelHelper.cs" />
     <Compile Include="Common\ApiControllerExtensions.cs" />
     <Compile Include="Common\FieldsCopier.cs" />

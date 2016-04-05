@@ -10,6 +10,7 @@ using System.Web.Http.Cors;
 
 namespace PhotoGallery2.Server.Controllers
 {
+    [Authorize]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     [RoutePrefix("api")]
     public class AlbumsController : ApiController

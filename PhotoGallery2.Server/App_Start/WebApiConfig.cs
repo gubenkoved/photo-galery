@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhotoGalery2.Server.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -11,6 +12,8 @@ namespace PhotoGallery2.Server
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
+
+            config.MessageHandlers.Add(new AuthMessageHandler());
 
             config.EnableCors();
 
