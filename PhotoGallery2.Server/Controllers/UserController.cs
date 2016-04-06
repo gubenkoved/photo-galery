@@ -2,6 +2,7 @@
 using PhotoGalery2.Server.Models;
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,18 +22,32 @@ namespace PhotoGalery2.Server.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("authenticate")]
-        public AuthenticationResponse Authenticate(AuthenticationRequest authRequest)
+        public IHttpActionResult Authenticate(AuthenticationRequest authRequest)
         {
-            if (authRequest.Username == "admin" && authRequest.Password == "admin")
+            bool valid = false;
+            using (var context = new PrincipalContext(ContextType.Machine))
             {
-                return new AuthenticationResponse()
+                if (Principal.FindByIdentity(context, authRequest.Username) != null)
+                {
+                    valid = context.ValidateCredentials(authRequest.Username, authRequest.Password);
+                }
+            }
+
+            if (valid)
+            {
+                return Ok(new AuthenticationResponse()
                 {
                     AuthToken = DateTime.UtcNow.ToString(),
                     AuthType = AuthMessageHandler.AuthenticationType,
-                };
+                });
             }
 
-            throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            //throw new HttpResponseException(HttpStatusCode.Unauthorized);
+
+            return Content((HttpStatusCode)422, new AuthenticationResponse()
+            {
+                ErrorMessage = "Invalid username or password",
+            });
         }
 
         //[AllowAnonymous]

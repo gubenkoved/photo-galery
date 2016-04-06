@@ -9,6 +9,11 @@ body
   padding-top: 60px;
 }
 
+.invisible
+{
+  visibility: hidden;
+}
+
 div[album-view]
 {
   position: relative;

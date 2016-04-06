@@ -14,5 +14,8 @@ namespace PhotoGalery2.Server.Models
 
         [DataMember]
         public string AuthType { get; set; }
+
+        [DataMember]
+        public string ErrorMessage { get; set; }
     }
 }

@@ -142,7 +142,7 @@ app.service('ConfigService', function (defaultConfig, localStorageService) {
     return service;
 });
 
-app.service('AuthService', function ($http, ConfigService, localStorageService) {
+app.service('AuthService', function ($http, $q, ConfigService, localStorageService) {
     var service = {}
 
     service.authenticate = function(username, password)
@@ -156,6 +156,8 @@ app.service('AuthService', function ($http, ConfigService, localStorageService) 
             .then(function(response) {
                 // auth - OK > save
 
+                console.log('AuthService::authOK');
+
                 var token = response.data.AuthToken;
                 var authType = response.data.AuthType;
 
@@ -167,6 +169,16 @@ app.service('AuthService', function ($http, ConfigService, localStorageService) 
                 console.dir(response.data);
 
                 localStorageService.set('auth', authData);
+            },
+            function(response)
+            {
+                //debugger;
+
+                console.log('AuthService::authError');
+
+                return $q.reject({
+                    errorMessage: response.data.ErrorMessage
+                });
             });
     }
 
@@ -178,6 +190,11 @@ app.service('AuthService', function ($http, ConfigService, localStorageService) 
     service.isAuthenticated = function()
     {
         return service.getAuthData !== null;
+    }
+
+    service.removeAuthData = function()
+    {
+        localStorageService.remove('auth');
     }
 
     service.addAuthTokenAsQueryParameter = function (url)
@@ -318,25 +335,42 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
 /* CONTROLLERS */
 
 app.controller('LoginController', function($rootScope, $scope, $routeParams, $window, ConfigService, AuthService) {
-    $rootScope.hideNavigation = true;
-
-    $scope.authenticate = function(username, password)
+    $scope.authenticate = function()
     {
+        $scope.authError = null;
+
         AuthService.authenticate($scope.auth.username, $scope.auth.password)
-            .then(function (authResult)
+            .then(function ()
             {
-                var returnTo = $routeParams.returnTo;
+                console.log('LoginController::authOK');
 
-                console.log('auth success');
-                console.log(returnTo);
+                var returnTo = $routeParams.returnTo || '/albums';
 
+                $rootScope.hideNavigation = false;
                 $window.location = './#' + returnTo;
+
             }, function (authError)
             {
-                console.log('auth error');
+                //debugger;
+                console.log('LoginController::authError');
+
+                $scope.authError = authError.errorMessage || 'Auth failed';
             });
 
         // redirect to orig route (if any)
+    }
+
+    $scope.logout = function ()
+    {
+        console.log('logout');
+
+        AuthService.removeAuthData();
+        $window.location = './#/login';
+    }
+
+    $scope.hideNavigation = function()
+    {
+        $rootScope.hideNavigation = true;
     }
 });
 
