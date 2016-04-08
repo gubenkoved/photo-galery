@@ -1,4 +1,5 @@
 ﻿using PhotoGalery2.Server.Common;
+using PhotoGalery2.Server.Common.Security;
 using PhotoGalery2.Server.Models;
 using System;
 using System.Collections.Generic;
@@ -35,10 +36,15 @@ namespace PhotoGalery2.Server.Controllers
 
             if (valid)
             {
+                OpaqueSecurityToken token = new OpaqueSecurityToken();
+
+                token.SecurePayload[OpaqueSecurityToken.KnownPayloadKeys.USERNAME] = authRequest.Username;
+                token.SecurePayload[OpaqueSecurityToken.KnownPayloadKeys.TTL_SEC] = (60 * 60).ToString(); // 1 hour
+
                 return Ok(new AuthenticationResponse()
                 {
-                    AuthToken = DateTime.UtcNow.ToString(),
-                    AuthType = AuthMessageHandler.AuthenticationType,
+                    AuthToken = token.SerializeToString(),
+                    AuthType  = AuthMessageHandler.AuthenticationType,
                 });
             }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhotoGalery2.Server.Common.Security;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -47,12 +48,30 @@ namespace PhotoGalery2.Server.Common
 
         private void HandleAuthData(HttpRequestMessage request, string token)
         {
-            var identity = new ClaimsIdentity(AuthenticationType);
+            try
+            {
+                var parsed = OpaqueSecurityToken.Parse(token);
 
-            var principal = new ClaimsPrincipal(identity);
+                string username = parsed.SecurePayload[OpaqueSecurityToken.KnownPayloadKeys.USERNAME];
 
-            request.GetRequestContext().Principal = principal;
-            //SetPrincipal(principal);
+                double ttl = double.Parse(parsed.SecurePayload[OpaqueSecurityToken.KnownPayloadKeys.TTL_SEC]);
+
+                if (DateTime.UtcNow > parsed.GenerationDateUTC.AddSeconds(ttl))
+                {
+                    return; // token expired
+                }
+
+                var identity = new ClaimsIdentity(AuthenticationType);
+                identity.AddClaim(new Claim(ClaimTypes.Name, username));
+
+                var principal = new ClaimsPrincipal(identity);
+
+                request.GetRequestContext().Principal = principal;
+            }
+            catch (Exception)
+            {
+                // swallow
+            }
         }
 
         private static void SetPrincipal(IPrincipal principal)
