@@ -252,7 +252,7 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
         return r;
     }
 
-    function addAuthTokenToThumbUrls(albumModel) {
+    function addAuthToken(albumModel) {
         angular.forEach(albumModel.albumItems, function(item) {
             if (item.thumbUrl)
             {
@@ -261,9 +261,12 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
         });
 
         angular.forEach(albumModel.contentItems, function(item) {
-            if (item.thumbUrl)
-            {
+            if (item.thumbUrl) {
                 item.thumbUrl = AuthService.addAuthTokenAsQueryParameter(item.thumbUrl);
+            }
+
+            if (item.url) {
+                item.url = AuthService.addAuthTokenAsQueryParameter(item.url);
             }
         });
     }
@@ -299,7 +302,7 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
             return $http.get(ConfigService.get().apiRoot + '/albums')
                 .then(function(response) {
                     var model = mapAlbumsResponse(response.data);
-                    addAuthTokenToThumbUrls(model);
+                    addAuthToken(model);
                     return model;
                 });
         }
@@ -307,7 +310,8 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
         return $http.get(albumUrl)
             .then(function(response) {
                 var model = mapAlbumsResponse(response.data);
-                    addAuthTokenToThumbUrls(model);
+                    debugger;
+                    addAuthToken(model);
                     return model;
             });
     }
