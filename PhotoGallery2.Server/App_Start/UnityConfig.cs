@@ -22,7 +22,7 @@ namespace PhotoGallery2.Server
             IoC.Container.RegisterType<PhotoGaleryFactory, NaivePhotoGaleryFactory>
                 (new InjectionConstructor(new NaivePhotoGaleryFactory.SettingsGroup()
                 {
-                    RootDir = @"C:\Users\nrj\Documents\Dropbox\Photos",
+                    RootDir = @"D:\Dropbox\Photos",
                     Extensions = new[] { ".jpg", ".jpeg", ".bmp" },
                     ThumbCacheDir = @"C:\temp\photo-gallery-thumbs-cache"
                 }));

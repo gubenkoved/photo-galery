@@ -11,6 +11,10 @@ namespace PhotoGallery2.Server
     {
         public static void Register(HttpConfiguration config)
         {
+            // show failure details
+            GlobalConfiguration.Configuration.IncludeErrorDetailPolicy
+                = IncludeErrorDetailPolicy.Always;
+
             // Web API configuration and services
 
             config.MessageHandlers.Add(new AuthMessageHandler());
