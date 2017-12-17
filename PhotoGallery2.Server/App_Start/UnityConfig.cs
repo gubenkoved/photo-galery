@@ -1,9 +1,11 @@
+using System;
+using System.Configuration;
+using System.Linq;
+using System.Web.Http;
 using Microsoft.Practices.Unity;
 using PhotoGallery2.Core;
-using PhotoGallery2.Core.Implementation;
 using PhotoGallery2.Core.Implementation.Naive;
 using PhotoGallery2.Server.Common;
-using System.Web.Http;
 using Unity.WebApi;
 
 namespace PhotoGallery2.Server
@@ -19,12 +21,19 @@ namespace PhotoGallery2.Server
 
             // e.g. container.RegisterType<ITestService, TestService>();
 
+            string rootDir = ConfigurationManager.AppSettings["PhotosRootDir"];
+            string thumCacheDir = ConfigurationManager.AppSettings["ThumbnailsCacheDir"];
+            string[] extensions = ConfigurationManager.AppSettings["Extensions"]
+                .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToArray();
+
             IoC.Container.RegisterType<PhotoGaleryFactory, NaivePhotoGaleryFactory>
                 (new InjectionConstructor(new NaivePhotoGaleryFactory.SettingsGroup()
                 {
-                    RootDir = @"D:\Dropbox\Photos",
-                    Extensions = new[] { ".jpg", ".jpeg", ".bmp" },
-                    ThumbCacheDir = @"C:\temp\photo-gallery-thumbs-cache"
+                    RootDir       = rootDir,
+                    ThumbCacheDir = thumCacheDir,
+                    Extensions    = extensions,
                 }));
 
             IoC.Container.RegisterType<AlbumItemsPathProvider, DefaultAlbumItemsPathProvider>();
