@@ -255,19 +255,15 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
     function addAuthToken(albumModel) {
         angular.forEach(albumModel.albumItems, function(item) {
             if (item.thumbUrl)
-            {
                 item.thumbUrl = AuthService.addAuthTokenAsQueryParameter(item.thumbUrl);
-            }
         });
 
         angular.forEach(albumModel.contentItems, function(item) {
-            if (item.thumbUrl) {
+            if (item.thumbUrl)
                 item.thumbUrl = AuthService.addAuthTokenAsQueryParameter(item.thumbUrl);
-            }
 
-            if (item.url) {
+            if (item.url)
                 item.url = AuthService.addAuthTokenAsQueryParameter(item.url);
-            }
         });
     }
 
@@ -285,9 +281,7 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'h', height);
 
             if (keepSourceAspectRatio !== true)
-            {
                 thumbUrl = _updateQueryStringParameter(thumbUrl, 'enforceSourceAspectRatio', 'false');
-            }
         } else
         {
             thumbUrl = _updateQueryStringParameter(thumbUrl, 'w', ConfigService.get().desiredThumbSize.width);
@@ -310,7 +304,7 @@ app.service('AlbumsService', function($http, ConfigService, AuthService, $q) {
         return $http.get(albumUrl)
             .then(function(response) {
                 var model = mapAlbumsResponse(response.data);
-                    debugger;
+                    //debugger;
                     addAuthToken(model);
                     return model;
             });
@@ -733,7 +727,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             $scope.lazyLoadingBatchSize = $scope.lazyLoadingBatchSize || 12;
 
             function _scaleRow(itemsRow, targetWidth) {
-                console.log('scaling row');
+                console.log('scaling row to width ' + targetWidth);
                 //console.log(itemsRow);
 
                 targetWidth -= 5;
@@ -752,12 +746,10 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     var itemTargetWidth = item.width() * scaleFactor;
                     var itemTargetHeight = item.height() * scaleFactor;
 
-                    //itemTargetWidth = Math.round(itemTargetWidth);
-
                     // this will fix align items by height that could
                     // be little messed up due to floating point height
-                    // I don't see such trouble for float width however
-                    itemTargetHeight = Math.round(itemTargetHeight);
+                    itemTargetWidth = Math.floor(itemTargetWidth);
+                    itemTargetHeight = Math.floor(itemTargetHeight);
 
                     item.width(itemTargetWidth);
                     item.height(itemTargetHeight);
@@ -769,13 +761,26 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                 angular.forEach(items, function(item) {
                     item = angular.element(item);
 
-                    var itemAspect = angular.element(item).scope().aspect || 1.3333;
+                    var itemScope = angular.element(item).scope();
+                    var itemAspect = itemScope.aspect || 1.3333;
+                    var itemName = 'N/A';
+
+                    if (itemScope.contentItem)
+                        itemName = itemScope.contentItem.name;
+                    
+                    var height = $scope.targetHeight;
+                    var width = itemAspect * $scope.targetHeight;
+
+                    height = Math.floor(height);
+                    width = Math.floor(width);
 
                     item.css({
-                        height: $scope.targetHeight + 'px',
-                        width: itemAspect * $scope.targetHeight + 'px',
+                        height: height + 'px',
+                        width: width + 'px',
                         position: 'relative'
                     });
+
+                    console.log('  size for ' + itemName + ' ' + width + 'x' + height);
 
                     item.children().css({
                         position: 'absolute',
@@ -943,8 +948,22 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                         console.log('[lazy-loading] request more items');
                     }
 
+                    if ($scope.lazyLoadingInProgress === true)
+                    {
+                        // this fixes problem I used to have with multiple lazy loadings running at the same time
+                        console.log('suppress lazy-loading!');
+                        return;
+                    }
+
+                    $scope.lazyLoadingInProgress = true;
+
                     var toRender = $scope.getNewContentItemsBatchToRender();
-                    return $scope.appendRearrageBatch(toRender);
+
+                    return $scope.appendRearrageBatch(toRender)
+                        .then(function() {
+                            //console.log('[lazy-loading] done');
+                            $scope.lazyLoadingInProgress = false;
+                        });
                 };
 
                 return loadFunc();
@@ -1006,9 +1025,7 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                     $timeout(function(){
 
                         if ($scope.rearrangeNeeded)
-                        {
                             $scope.rearrangeAll();
-                        }
 
                     }, 1000);
                 }
