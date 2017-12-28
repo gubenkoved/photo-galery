@@ -428,55 +428,40 @@ app.controller('AlbumsController',
             $('.navbar-fixed-top').autoHidingNavbar('setDisableAutohide', true);
 
             $scope.fsvCurrentImageIndex = $scope.currentAlbum.contentItems.indexOf(item);
-            $scope.scrollTopValueBeforeNoScroll = $('body').scrollTop();
+
+            $scope.isFullScreenMode = true;
+
+            $('html').css({ 'overflow': 'hidden' });
 
             $('#full-screen-view').show();
             $('.navbar-fixed-top').hide();
-            
-            $('body').addClass('noscroll');
-            $('body').css({
-                'margin-top': -1 * $scope.scrollTopValueBeforeNoScroll + 'px'
-            });
         }
 
         $scope.fsvOnClose = function(item) {
             $('.navbar-fixed-top').show();
 
-            $('body').removeClass('noscroll');
-
-            console.log('restore scroll top to: ' + $scope.scrollTopValueBeforeNoScroll);
+            $('html').css({ 'overflow': 'auto' });
 
             $timeout(function(){
-                $('body').css({
-                    'margin-top': 0
-                });
-
-                // restore original view position
-                $('body').scrollTop( $scope.scrollTopValueBeforeNoScroll );
-
                 // enable auto menu hide back
                 $('.navbar-fixed-top').autoHidingNavbar('setDisableAutohide', false);
+
+                $scope.isFullScreenMode = false;
             });
         }
 
-        $scope.fsvNavigateLeft = function ()
-        {
+        $scope.fsvNavigateLeft = function () {
             console.log('fsvNavigateLeft');
 
             if ($scope.fsvCurrentImageIndex > 0)
-            {
                 $scope.fsvCurrentImageIndex -= 1;
-            }
         }
 
-        $scope.fsvNavigateRight = function ()
-        {
+        $scope.fsvNavigateRight = function () {
             console.log('fsvNavigateRight');
 
             if ($scope.fsvCurrentImageIndex < $scope.currentAlbum.contentItems.length - 1)
-            {
                 $scope.fsvCurrentImageIndex += 1;
-            }
         }
 
         $scope.debug = function(o) {
@@ -716,7 +701,8 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             targetHeight: '@',
             onAlbumClick: '&',
             onContentItemClick: '&',
-            lazyLoadingBatchSize: '@'
+            lazyLoadingBatchSize: '@',
+            suppressRearrangeOnSizeChanges: '='
         },
         restrict: 'A',
         templateUrl: '/app/directives/albumView.html',
@@ -940,16 +926,18 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             $scope.loadMoreContentItems = function ()
             {
                 var loadFunc = function () {
-                    if ($scope.lastContentItemIndex >= $scope.album.contentItems.length)
-                    {
-                        console.log('[lazy-loading] all set!');
-                    } else
-                    {
-                        console.log('[lazy-loading] request more items');
+
+                    if (!$scope.album) {
+                        console.log('no album!');
+                        return;
                     }
 
-                    if ($scope.lazyLoadingInProgress === true)
-                    {
+                    if ($scope.lastContentItemIndex >= $scope.album.contentItems.length)
+                        console.log('[lazy-loading] all set!');
+                    else
+                        console.log('[lazy-loading] request more items');
+
+                    if ($scope.lazyLoadingInProgress === true) {
                         // this fixes problem I used to have with multiple lazy loadings running at the same time
                         console.log('suppress lazy-loading!');
                         return;
@@ -986,11 +974,13 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
                         albumItemScope.albumItem = albumItemModel;
 
                         var itemWrapper = angular.element('<div></div>');
+                        
                         itemWrapper.css({
                             display: 'inline-block',
                             margin: 0,
                             padding: 0
                         });
+
                         itemWrapper.addClass('item-wrapper');
                         
                         var albumItemDirective = angular.element('<div album-item item="albumItem" on-click="onAlbumClick()(albumItem)"></div>');
@@ -1018,15 +1008,18 @@ app.directive('albumView', function ($compile, $timeout, $window, $q) {
             }, function (newValue, oldValue) {
                 if (newValue && oldValue && newValue !== oldValue)
                 {
+                    if ($scope.suppressRearrangeOnSizeChanges === true) {
+                        console.log('suppress rearrange');
+                        return;
+                    }
+
                     console.log('viewport width changed from ' + oldValue + ' to ' + newValue);
 
                     $scope.rearrangeNeeded = true;
 
                     $timeout(function(){
-
                         if ($scope.rearrangeNeeded)
                             $scope.rearrangeAll();
-
                     }, 1000);
                 }
             });
